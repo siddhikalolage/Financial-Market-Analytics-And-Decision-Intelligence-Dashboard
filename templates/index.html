@@ -3,201 +3,2125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Market Tracker</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <div class="container-fluid">
-        <header class="navbar navbar-dark bg-dark mb-4">
-            <div class="container">
-                <h1 class="navbar-brand mb-0">📈 Stock Market Tracker</h1>
-                <span class="navbar-text">Real-time Analysis & Predictions</span>
-            </div>
-        </header>
 
-        <div class="container">
-            <!-- Key Metrics Row -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Current Price</h5>
-                            <h2 class="text-primary">${{ last_close }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Daily Change</h5>
-                            <h2 style="color: {{ trend_color }};">
-                                {{ '+' if price_change > 0 else '' }}${{ price_change }}
-                            </h2>
-                            <small class="text-muted">({{ percent_change }}%)</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Trend</h5>
-                            <h2 style="color: {{ trend_color }};">{{ trend }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Avg Volume (30d)</h5>
-                            <h2 class="text-info">{{ "{:,}".format(avg_volume) }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <title>Financial Market Analytics & Decision Intelligence</title>
 
-            <!-- Charts Row -->
-            <div class="row mb-4">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Price Chart (Last 30 Days)</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="priceChart" width="400" height="200"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Volume Chart (Last 30 Days)</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="volumeChart" width="200" height="200"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
-            <!-- Predictions Row -->
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>📊 Price Predictions (Next 5 Days)</h5>
-                            <small class="text-muted">Based on simple moving average trend analysis</small>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                {% for pred in predictions %}
-                                <div class="col-md-2">
-                                    <div class="prediction-box">
-                                        <div class="prediction-day">Day {{ loop.index }}</div>
-                                        <div class="prediction-price">${{ pred }}</div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
 
-            <!-- API Info Row -->
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>🔌 API Endpoints</h5>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>Get Stock Data:</strong> <code>GET /api/data</code></p>
-                            <p><strong>Get Predictions:</strong> <code>GET /api/prediction</code></p>
-                            <button class="btn btn-outline-primary" onclick="refreshData()">🔄 Refresh Data</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <footer class="bg-dark text-light text-center py-3 mt-5">
-            <p>&copy; 2024 Stock Market Tracker | Built with Flask, Pandas & TensorFlow</p>
-        </footer>
-    </div>
-
-    <script>
-        // Chart data from Flask
-        const chartData = {{ chart_data | tojson | safe }};
-        
-        // Price Chart
-        const priceCtx = document.getElementById('priceChart').getContext('2d');
-        const priceChart = new Chart(priceCtx, {
-            type: 'line',
-            data: {
-                labels: chartData.dates,
-                datasets: [{
-                    label: 'Close Price ($)',
-                    data: chartData.prices,
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Stock Price Trend'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false
-                    }
-                }
-            }
-        });
-
-        // Volume Chart
-        const volumeCtx = document.getElementById('volumeChart').getContext('2d');
-        const volumeChart = new Chart(volumeCtx, {
-            type: 'bar',
-            data: {
-                labels: chartData.dates.slice(-10), // Last 10 days only
-                datasets: [{
-                    label: 'Volume',
-                    data: chartData.volumes.slice(-10),
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Trading Volume'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Refresh data function
-        function refreshData() {
-            location.reload();
+    <style>
+        body {
+            background: #f4f7fb;
+            color: #172033;
         }
 
-        // Auto-refresh every 30 seconds (for demo purposes)
-        setInterval(refreshData, 30000);
-    </script>
+        .navbar {
+            background: linear-gradient(135deg, #111827, #1e3a8a);
+        }
+
+        .brand-title {
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(15, 23, 42, 0.07);
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            min-height: 150px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .section-title {
+            font-weight: 700;
+        }
+
+        .prediction-card {
+            background: linear-gradient(
+                135deg,
+                #111827,
+                #1d4ed8
+            );
+            color: white;
+        }
+
+        .prediction-price {
+            font-size: 2.7rem;
+            font-weight: 800;
+        }
+
+        .prediction-change {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .bullish {
+            color: #22c55e;
+        }
+
+        .bearish {
+            color: #ef4444;
+        }
+
+        .neutral {
+            color: #facc15;
+        }
+
+        .model-badge {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 7px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+
+        .prediction-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .prediction-box .label {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .prediction-box .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .insight-card {
+            border-left: 5px solid #64748b;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .insight-negative {
+            border-left-color: #ef4444;
+        }
+
+        .insight-warning {
+            border-left-color: #f59e0b;
+        }
+
+        .insight-positive {
+            border-left-color: #22c55e;
+        }
+
+        .insight-title {
+            font-weight: 700;
+        }
+
+        .insight-message {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .metric-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .metric-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .warning-box {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        footer {
+            background: #111827;
+            color: #94a3b8;
+        }
+
+        /* =====================================================
+           SVG CHARTS
+           ===================================================== */
+
+        .chart-wrapper {
+            width: 100%;
+            height: 330px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-wrapper svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .chart-grid {
+            stroke: #e2e8f0;
+            stroke-width: 1;
+        }
+
+        .price-line {
+            fill: none;
+            stroke: #2563eb;
+            stroke-width: 2.5;
+            vector-effect: non-scaling-stroke;
+        }
+
+        .price-area {
+            fill: rgba(37, 99, 235, 0.08);
+        }
+
+        .volume-bar {
+            fill: #60a5fa;
+            opacity: 0.75;
+        }
+
+        .chart-label {
+            fill: #64748b;
+            font-size: 11px;
+        }
+
+        .chart-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+
+            .prediction-price {
+                font-size: 2rem;
+            }
+
+            .chart-wrapper {
+                height: 260px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ========================================================= -->
+<!-- HEADER -->
+<!-- ========================================================= -->
+
+<nav class="navbar navbar-dark py-3 mb-4">
+
+    <div class="container">
+
+        <div>
+
+            <div class="brand-title text-white fs-4">
+                📈 Financial Market Analytics
+            </div>
+
+            <div class="subtitle">
+                Analytics & Decision Intelligence Dashboard
+            </div>
+
+        </div>
+
+        <span class="model-badge">
+            ● ML System Online
+        </span>
+
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+<!-- ========================================================= -->
+<!-- ERROR -->
+<!-- ========================================================= -->
+
+{% if error %}
+
+<div class="alert alert-danger">
+
+    <strong>Dashboard Error:</strong>
+    {{ error }}
+
+</div>
+
+{% endif %}
+
+
+<!-- ========================================================= -->
+<!-- KEY METRICS -->
+<!-- ========================================================= -->
+
+<div class="row">
+
+    <div class="col-md-3">
+
+        <div class="card metric-card">
+
+            <div class="card-body">
+
+                <div class="metric-label">
+                    Current Price
+                </div>
+
+                <div class="metric-value text-primary">
+                    ${{ "%.2f"|format(last_close) }}
+                </div>
+
+                <small class="text-muted">
+                    Latest available market close
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card metric-card">
+
+            <div class="card-body">
+
+                <div class="metric-label">
+                    Daily Change
+                </div>
+
+                <div
+                    class="metric-value"
+                    style="color: {{ trend_color }};"
+                >
+
+                    {{ "+" if price_change > 0 else "" }}${{
+                        "%.2f"|format(price_change)
+                    }}
+
+                </div>
+
+                <small class="text-muted">
+
+                    {{ "+" if percent_change > 0 else "" }}{{
+                        "%.2f"|format(percent_change)
+                    }}%
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card metric-card">
+
+            <div class="card-body">
+
+                <div class="metric-label">
+                    Market Trend
+                </div>
+
+                <div
+                    class="metric-value"
+                    style="color: {{ trend_color }};"
+                >
+
+                    {{ trend }}
+
+                </div>
+
+                <small class="text-muted">
+                    Based on latest daily movement
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+        <div class="card metric-card">
+
+            <div class="card-body">
+
+                <div class="metric-label">
+                    Avg Volume (20D)
+                </div>
+
+                <div class="metric-value text-info">
+
+                    {{ "{:,.0f}".format(avg_volume) }}
+
+                </div>
+
+                <small class="text-muted">
+                    Rolling average trading volume
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- ML PREDICTION -->
+<!-- ========================================================= -->
+
+{% if prediction %}
+
+<div class="card prediction-card">
+
+    <div class="card-body p-4">
+
+        <div class="d-flex justify-content-between align-items-start">
+
+            <div>
+
+                <div class="text-uppercase small opacity-75">
+                    Machine Learning Forecast
+                </div>
+
+                <h2 class="mt-1">
+                    Next Trading Day Prediction
+                </h2>
+
+            </div>
+
+            <span class="model-badge">
+                {{ prediction.model_type }}
+            </span>
+
+        </div>
+
+
+        <div class="row align-items-center mt-4">
+
+            <div class="col-md-4">
+
+                <div class="small opacity-75">
+                    Current Close
+                </div>
+
+                <div class="fs-3 fw-bold">
+
+                    ${{ "%.2f"|format(
+                        prediction.current_close
+                    ) }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="small opacity-75">
+                    Predicted Next Close
+                </div>
+
+                <div class="prediction-price">
+
+                    ${{ "%.2f"|format(
+                        prediction.predicted_next_close
+                    ) }}
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="small opacity-75">
+                    Expected Movement
+                </div>
+
+                <div
+                    class="prediction-change
+                    {% if prediction.direction == 'Bullish' %}
+                        bullish
+                    {% elif prediction.direction == 'Bearish' %}
+                        bearish
+                    {% else %}
+                        neutral
+                    {% endif %}"
+                >
+
+                    {{ "+" if prediction.predicted_change_percent > 0 else "" }}{{
+                        "%.2f"|format(
+                            prediction.predicted_change_percent
+                        )
+                    }}%
+
+                    • {{ prediction.direction }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+<!-- ========================================================= -->
+<!-- HISTORICAL CHARTS -->
+<!-- ========================================================= -->
+
+<div class="row">
+
+    <div class="col-md-8">
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <h5 class="section-title">
+                    Historical Price Analysis
+                </h5>
+
+                <p class="text-muted small">
+                    Latest 120 observations
+                </p>
+
+                <div class="chart-wrapper">
+
+                    <svg
+                        id="priceChart"
+                        viewBox="0 0 800 320"
+                        preserveAspectRatio="none"
+                        aria-label="Historical price chart"
+                    ></svg>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <h5 class="section-title">
+                    Trading Volume
+                </h5>
+
+                <p class="text-muted small">
+                    Recent market activity
+                </p>
+
+                <div class="chart-wrapper">
+
+                    <svg
+                        id="volumeChart"
+                        viewBox="0 0 500 320"
+                        preserveAspectRatio="none"
+                        aria-label="Trading volume chart"
+                    ></svg>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- MARKET INTELLIGENCE -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+    <div class="card-body">
+
+        <h5 class="section-title">
+            Market Intelligence
+        </h5>
+
+        <p class="text-muted small">
+            Rule-based analytical signals derived from market data.
+        </p>
+
+
+        {% for insight in insights %}
+
+        <div
+            class="insight-card
+            {% if insight.severity == 'negative' %}
+                insight-negative
+            {% elif insight.severity == 'warning' %}
+                insight-warning
+            {% elif insight.severity == 'positive' %}
+                insight-positive
+            {% endif %}"
+        >
+
+            <div class="insight-title">
+                {{ insight.title }}
+            </div>
+
+            <div class="insight-message">
+                {{ insight.message }}
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- DECISION INTELLIGENCE -->
+<!-- ========================================================= -->
+
+{% if decision %}
+
+<div class="card">
+
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <h5 class="section-title mb-1">
+                    Decision Intelligence
+                </h5>
+
+                <p class="text-muted small mb-0">
+                    Explainable analytical decision-support layer.
+                </p>
+
+            </div>
+
+            <span
+                class="badge
+                {% if decision.decision == 'BULLISH' %}
+                    bg-success
+                {% elif decision.decision == 'BEARISH' %}
+                    bg-danger
+                {% elif decision.decision == 'WATCH' %}
+                    bg-warning text-dark
+                {% elif decision.decision == 'AVOID' %}
+                    bg-danger
+                {% else %}
+                    bg-secondary
+                {% endif %}"
+            >
+
+                {{ decision.decision }}
+
+            </span>
+
+        </div>
+
+
+        <div class="row mt-4">
+
+            <div class="col-md-3">
+
+                <div class="prediction-box">
+
+                    <div class="label">
+                        Decision Score
+                    </div>
+
+                    <div class="value">
+
+                        {{ "%.1f"|format(
+                            decision.decision_score
+                        ) }}
+
+                        / 100
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="prediction-box">
+
+                    <div class="label">
+                        Confidence
+                    </div>
+
+                    <div class="value">
+
+                        {{ "%.1f"|format(
+                            decision.confidence
+                        ) }}%
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        {{ decision.confidence_label }}
+
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="prediction-box">
+
+                    <div class="label">
+                        ML Reliability
+                    </div>
+
+                    <div class="value">
+
+                        {{ "%.1f"|format(
+                            decision.model_reliability.score
+                        ) }}
+
+                        / 100
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        {{ decision.model_reliability.rating }}
+
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <div class="prediction-box">
+
+                    <div class="label">
+                        Risk Level
+                    </div>
+
+                    <div class="value">
+
+                        {{ decision.risk_level }}
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        Score:
+                        {{ "%.1f"|format(decision.risk_score) }}
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="alert alert-light border mt-4 mb-3">
+
+            <strong>Decision Explanation</strong>
+
+            <br>
+
+            {{ decision.explanation }}
+
+        </div>
+
+
+        {% if decision.ml_warning %}
+
+        <div class="warning-box">
+
+            <strong>ML Reliability Note</strong>
+
+            <br>
+
+            {{ decision.ml_warning }}
+
+        </div>
+
+        {% endif %}
+
+
+        {% if decision.evidence %}
+
+        <div class="mt-4">
+
+            <h6 class="fw-bold">
+                Supporting Evidence
+            </h6>
+
+            {% for item in decision.evidence %}
+
+            <div class="insight-card
+                {% if item.type == 'negative' %}
+                    insight-negative
+                {% elif item.type == 'warning' %}
+                    insight-warning
+                {% elif item.type == 'positive' %}
+                    insight-positive
+                {% endif %}"
+            >
+
+                <div class="insight-title">
+                    {{ item.category }}
+                </div>
+
+                <div class="insight-message">
+                    {{ item.message }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="text-muted small mt-3">
+
+            {{ decision.disclaimer }}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+<!-- ========================================================= -->
+<!-- MODEL EVALUATION -->
+<!-- ========================================================= -->
+
+{% if prediction %}
+
+<div class="card">
+
+    <div class="card-body">
+
+        <h5 class="section-title">
+            ML Model Evaluation
+        </h5>
+
+        <p class="text-muted small">
+            Performance on the held-out test set.
+        </p>
+
+
+        <div class="row">
+
+            <div class="col-md-6">
+
+                <table class="table metric-table">
+
+                    <tr>
+                        <td>Training Samples</td>
+                        <td>
+                            {{ prediction.training_samples }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Testing Samples</td>
+                        <td>
+                            {{ prediction.testing_samples }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Features</td>
+                        <td>
+                            {{ prediction.feature_count }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Target</td>
+                        <td>
+                            {{ prediction.target }}
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <table class="table metric-table">
+
+                    <tr>
+                        <td>Model MAE</td>
+                        <td>
+                            {{ "%.4f"|format(
+                                prediction.model_mae
+                            ) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Baseline MAE</td>
+                        <td>
+                            {{ "%.4f"|format(
+                                prediction.baseline_mae
+                            ) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Model RMSE</td>
+                        <td>
+                            {{ "%.4f"|format(
+                                prediction.model_rmse
+                            ) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Model R²</td>
+                        <td>
+                            {{ "%.4f"|format(
+                                prediction.model_r2
+                            ) }}
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <div class="warning-box mt-3">
+
+            <strong>
+                Model Evaluation Note
+            </strong>
+
+            <br>
+
+            The current neural network is integrated successfully,
+            but its validation performance is below the persistence
+            baseline. This dashboard presents the prediction as an
+            experimental decision-support signal rather than a
+            guaranteed forecast.
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+<!-- ========================================================= -->
+<!-- SYSTEM INFORMATION -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+    <div class="card-body">
+
+        <h5 class="section-title">
+            System Information
+        </h5>
+
+        <div class="row text-muted small">
+
+            <div class="col-md-3">
+
+                <strong>
+                    Backend
+                </strong>
+
+                <br>
+
+                Flask API
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <strong>
+                    Data Processing
+                </strong>
+
+                <br>
+
+                Pandas
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <strong>
+                    ML Framework
+                </strong>
+
+                <br>
+
+                TensorFlow / Keras
+
+            </div>
+
+
+            <div class="col-md-3">
+
+                <strong>
+                    Visualization
+                </strong>
+
+                <br>
+
+                Lightweight SVG
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- FOOTER -->
+<!-- ========================================================= -->
+
+<footer class="py-4 mt-4">
+
+    <div class="container text-center">
+
+        <div>
+            Financial Market Analytics & Decision Intelligence Dashboard
+        </div>
+
+        <small>
+            ML-powered research and decision-support system
+        </small>
+
+    </div>
+
+</footer>
+
+
+<!-- ========================================================= -->
+<!-- SVG CHART ENGINE -->
+<!-- ========================================================= -->
+
+<script>
+
+(function () {
+
+    "use strict";
+
+
+    /* =========================================================
+       DATA FROM FLASK
+       ========================================================= */
+
+    const chartData =
+        {{ chart_data | tojson | safe }};
+
+
+    console.log(
+        "Chart data received:",
+        chartData
+    );
+
+
+    /* =========================================================
+       SVG HELPER
+       ========================================================= */
+
+    function createSvgElement(
+        tag,
+        attributes
+    ) {
+
+        const element =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                tag
+            );
+
+
+        Object.keys(attributes).forEach(
+            function (key) {
+
+                element.setAttribute(
+                    key,
+                    attributes[key]
+                );
+
+            }
+        );
+
+
+        return element;
+
+    }
+
+
+    /* =========================================================
+       CLEAR SVG
+       ========================================================= */
+
+    function clearSvg(svg) {
+
+        while (svg.firstChild) {
+
+            svg.removeChild(
+                svg.firstChild
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       NUMBER CLEANER
+       ========================================================= */
+
+    function cleanNumbers(values) {
+
+        if (!Array.isArray(values)) {
+            return [];
+        }
+
+
+        return values
+            .map(function (value) {
+
+                return Number(value);
+
+            })
+            .filter(function (value) {
+
+                return Number.isFinite(value);
+
+            });
+
+    }
+
+
+    /* =========================================================
+       VOLUME FORMATTER
+       ========================================================= */
+
+    function formatVolume(value) {
+
+        if (value >= 1000000000) {
+
+            return (
+                value / 1000000000
+            ).toFixed(1) + "B";
+
+        }
+
+
+        if (value >= 1000000) {
+
+            return (
+                value / 1000000
+            ).toFixed(1) + "M";
+
+        }
+
+
+        if (value >= 1000) {
+
+            return (
+                value / 1000
+            ).toFixed(1) + "K";
+
+        }
+
+
+        return Math.round(value);
+
+    }
+
+
+    /* =========================================================
+       PRICE CHART
+       ========================================================= */
+
+    function renderPriceChart() {
+
+        const svg =
+            document.getElementById(
+                "priceChart"
+            );
+
+
+        if (!svg) {
+
+            console.error(
+                "priceChart SVG not found."
+            );
+
+            return;
+
+        }
+
+
+        clearSvg(svg);
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Flask sends:
+         *
+         * chartData.close
+         *
+         * NOT:
+         *
+         * chartData.prices
+         */
+
+        const prices =
+            cleanNumbers(
+                chartData.close
+            );
+
+
+        const dates =
+            Array.isArray(
+                chartData.dates
+            )
+                ? chartData.dates
+                : [];
+
+
+        console.log(
+            "Price chart points:",
+            prices.length
+        );
+
+
+        if (!prices.length) {
+
+            const message =
+                createSvgElement(
+                    "text",
+                    {
+                        x: 400,
+                        y: 160,
+                        "text-anchor":
+                            "middle",
+                        class:
+                            "chart-label"
+                    }
+                );
+
+
+            message.textContent =
+                "No price data available.";
+
+
+            svg.appendChild(
+                message
+            );
+
+
+            return;
+
+        }
+
+
+        const width = 800;
+        const height = 320;
+
+
+        const padding = {
+
+            top: 20,
+            right: 20,
+            bottom: 35,
+            left: 60
+
+        };
+
+
+        const plotWidth =
+            width -
+            padding.left -
+            padding.right;
+
+
+        const plotHeight =
+            height -
+            padding.top -
+            padding.bottom;
+
+
+        const minPrice =
+            Math.min(
+                ...prices
+            );
+
+
+        const maxPrice =
+            Math.max(
+                ...prices
+            );
+
+
+        const range =
+            maxPrice -
+            minPrice ||
+            1;
+
+
+        /* =====================================================
+           GRID
+           ===================================================== */
+
+        for (
+            let i = 0;
+            i <= 4;
+            i++
+        ) {
+
+            const y =
+                padding.top +
+                (
+                    plotHeight *
+                    i /
+                    4
+                );
+
+
+            const grid =
+                createSvgElement(
+                    "line",
+                    {
+                        x1:
+                            padding.left,
+
+                        y1:
+                            y,
+
+                        x2:
+                            width -
+                            padding.right,
+
+                        y2:
+                            y,
+
+                        class:
+                            "chart-grid"
+                    }
+                );
+
+
+            svg.appendChild(
+                grid
+            );
+
+
+            const value =
+                maxPrice -
+                (
+                    range *
+                    i /
+                    4
+                );
+
+
+            const label =
+                createSvgElement(
+                    "text",
+                    {
+                        x:
+                            padding.left -
+                            8,
+
+                        y:
+                            y + 4,
+
+                        "text-anchor":
+                            "end",
+
+                        class:
+                            "chart-label"
+                    }
+                );
+
+
+            label.textContent =
+                value.toFixed(2);
+
+
+            svg.appendChild(
+                label
+            );
+
+        }
+
+
+        /* =====================================================
+           PRICE POINTS
+           ===================================================== */
+
+        const points =
+            prices.map(
+                function (
+                    price,
+                    index
+                ) {
+
+                    const x =
+                        padding.left +
+                        (
+                            index /
+                            Math.max(
+                                prices.length -
+                                1,
+                                1
+                            )
+                        ) *
+                        plotWidth;
+
+
+                    const y =
+                        padding.top +
+                        (
+                            (
+                                maxPrice -
+                                price
+                            ) /
+                            range
+                        ) *
+                        plotHeight;
+
+
+                    return {
+                        x: x,
+                        y: y
+                    };
+
+                }
+            );
+
+
+        /* =====================================================
+           LINE PATH
+           ===================================================== */
+
+        const pathData =
+            points
+                .map(
+                    function (
+                        point,
+                        index
+                    ) {
+
+                        return (
+                            index === 0
+                                ? "M "
+                                : "L "
+                        )
+                        +
+                        point.x.toFixed(2)
+                        +
+                        " "
+                        +
+                        point.y.toFixed(2);
+
+                    }
+                )
+                .join(" ");
+
+
+        /* =====================================================
+           AREA
+           ===================================================== */
+
+        const first =
+            points[0];
+
+
+        const last =
+            points[
+                points.length - 1
+            ];
+
+
+        const baseline =
+            padding.top +
+            plotHeight;
+
+
+        const areaPath =
+            pathData
+            +
+            " L "
+            +
+            last.x.toFixed(2)
+            +
+            " "
+            +
+            baseline
+            +
+            " L "
+            +
+            first.x.toFixed(2)
+            +
+            " "
+            +
+            baseline
+            +
+            " Z";
+
+
+        const area =
+            createSvgElement(
+                "path",
+                {
+                    d:
+                        areaPath,
+
+                    class:
+                        "price-area"
+                }
+            );
+
+
+        svg.appendChild(
+            area
+        );
+
+
+        /* =====================================================
+           PRICE LINE
+           ===================================================== */
+
+        const line =
+            createSvgElement(
+                "path",
+                {
+                    d:
+                        pathData,
+
+                    class:
+                        "price-line"
+                }
+            );
+
+
+        svg.appendChild(
+            line
+        );
+
+
+        /* =====================================================
+           DATE LABELS
+           ===================================================== */
+
+        if (dates.length) {
+
+            const indexes = [
+
+                0,
+
+                Math.floor(
+                    (
+                        dates.length -
+                        1
+                    ) /
+                    2
+                ),
+
+                dates.length - 1
+
+            ];
+
+
+            indexes.forEach(
+                function (index) {
+
+                    if (
+                        !dates[index] ||
+                        !points[index]
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const label =
+                        createSvgElement(
+                            "text",
+                            {
+                                x:
+                                    points[index].x,
+
+                                y:
+                                    height - 8,
+
+                                "text-anchor":
+                                    index === 0
+                                        ? "start"
+                                        : (
+                                            index ===
+                                            dates.length -
+                                            1
+
+                                                ? "end"
+
+                                                : "middle"
+                                        ),
+
+                                class:
+                                    "chart-label"
+                            }
+                        );
+
+
+                    label.textContent =
+                        dates[index];
+
+
+                    svg.appendChild(
+                        label
+                    );
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       VOLUME CHART
+       ========================================================= */
+
+    function renderVolumeChart() {
+
+        const svg =
+            document.getElementById(
+                "volumeChart"
+            );
+
+
+        if (!svg) {
+
+            console.error(
+                "volumeChart SVG not found."
+            );
+
+            return;
+
+        }
+
+
+        clearSvg(svg);
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Flask sends:
+         *
+         * chartData.volume
+         *
+         * NOT:
+         *
+         * chartData.volumes
+         */
+
+        const volumes =
+            cleanNumbers(
+                chartData.volume
+            )
+            .slice(-20);
+
+
+        const dates =
+            Array.isArray(
+                chartData.dates
+            )
+                ? chartData.dates.slice(-20)
+                : [];
+
+
+        console.log(
+            "Volume chart points:",
+            volumes.length
+        );
+
+
+        if (!volumes.length) {
+
+            const message =
+                createSvgElement(
+                    "text",
+                    {
+                        x: 250,
+                        y: 160,
+                        "text-anchor":
+                            "middle",
+                        class:
+                            "chart-label"
+                    }
+                );
+
+
+            message.textContent =
+                "No volume data available.";
+
+
+            svg.appendChild(
+                message
+            );
+
+
+            return;
+
+        }
+
+
+        const width = 500;
+        const height = 320;
+
+
+        const padding = {
+
+            top: 20,
+            right: 15,
+            bottom: 35,
+            left: 55
+
+        };
+
+
+        const plotWidth =
+            width -
+            padding.left -
+            padding.right;
+
+
+        const plotHeight =
+            height -
+            padding.top -
+            padding.bottom;
+
+
+        const maxVolume =
+            Math.max(
+                ...volumes
+            ) || 1;
+
+
+        /* =====================================================
+           GRID
+           ===================================================== */
+
+        for (
+            let i = 0;
+            i <= 4;
+            i++
+        ) {
+
+            const y =
+                padding.top +
+                (
+                    plotHeight *
+                    i /
+                    4
+                );
+
+
+            const grid =
+                createSvgElement(
+                    "line",
+                    {
+                        x1:
+                            padding.left,
+
+                        y1:
+                            y,
+
+                        x2:
+                            width -
+                            padding.right,
+
+                        y2:
+                            y,
+
+                        class:
+                            "chart-grid"
+                    }
+                );
+
+
+            svg.appendChild(
+                grid
+            );
+
+
+            const value =
+                maxVolume *
+                (
+                    1 -
+                    i /
+                    4
+                );
+
+
+            const label =
+                createSvgElement(
+                    "text",
+                    {
+                        x:
+                            padding.left -
+                            8,
+
+                        y:
+                            y + 4,
+
+                        "text-anchor":
+                            "end",
+
+                        class:
+                            "chart-label"
+                    }
+                );
+
+
+            label.textContent =
+                formatVolume(
+                    value
+                );
+
+
+            svg.appendChild(
+                label
+            );
+
+        }
+
+
+        /* =====================================================
+           VOLUME BARS
+           ===================================================== */
+
+        const barSlot =
+            plotWidth /
+            volumes.length;
+
+
+        const barWidth =
+            Math.max(
+                barSlot - 3,
+                1
+            );
+
+
+        volumes.forEach(
+            function (
+                volume,
+                index
+            ) {
+
+                const barHeight =
+                    (
+                        volume /
+                        maxVolume
+                    ) *
+                    plotHeight;
+
+
+                const x =
+                    padding.left +
+                    (
+                        index *
+                        barSlot
+                    ) +
+                    (
+                        barSlot -
+                        barWidth
+                    ) /
+                    2;
+
+
+                const y =
+                    padding.top +
+                    plotHeight -
+                    barHeight;
+
+
+                const bar =
+                    createSvgElement(
+                        "rect",
+                        {
+                            x:
+                                x,
+
+                            y:
+                                y,
+
+                            width:
+                                barWidth,
+
+                            height:
+                                Math.max(
+                                    barHeight,
+                                    1
+                                ),
+
+                            rx:
+                                2,
+
+                            class:
+                                "volume-bar"
+                        }
+                    );
+
+
+                svg.appendChild(
+                    bar
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           DATE LABELS
+           ===================================================== */
+
+        if (dates.length) {
+
+            const indexes = [
+
+                0,
+
+                Math.floor(
+                    (
+                        dates.length -
+                        1
+                    ) /
+                    2
+                ),
+
+                dates.length - 1
+
+            ];
+
+
+            indexes.forEach(
+                function (index) {
+
+                    if (!dates[index]) {
+                        return;
+                    }
+
+
+                    const x =
+                        padding.left +
+                        (
+                            index /
+                            Math.max(
+                                dates.length -
+                                1,
+                                1
+                            )
+                        ) *
+                        plotWidth;
+
+
+                    const label =
+                        createSvgElement(
+                            "text",
+                            {
+                                x:
+                                    x,
+
+                                y:
+                                    height - 8,
+
+                                "text-anchor":
+                                    index === 0
+                                        ? "start"
+                                        : (
+                                            index ===
+                                            dates.length -
+                                            1
+
+                                                ? "end"
+
+                                                : "middle"
+                                        ),
+
+                                class:
+                                    "chart-label"
+                            }
+                        );
+
+
+                    label.textContent =
+                        dates[index];
+
+
+                    svg.appendChild(
+                        label
+                    );
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       INITIALIZE
+       ========================================================= */
+
+    function initializeCharts() {
+
+        console.log(
+            "Initializing dashboard charts..."
+        );
+
+
+        renderPriceChart();
+
+
+        renderVolumeChart();
+
+
+        console.log(
+            "Dashboard charts initialized."
+        );
+
+    }
+
+
+    /* =========================================================
+       DOM READY
+       ========================================================= */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeCharts
+        );
+
+    } else {
+
+        initializeCharts();
+
+    }
+
+})();
+
+</script>
+
+
 </body>
 </html>

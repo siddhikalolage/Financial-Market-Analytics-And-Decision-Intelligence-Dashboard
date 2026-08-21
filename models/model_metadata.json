@@ -1,0 +1,28 @@
+{
+    "model_type": "TensorFlow/Keras Dense Neural Network",
+    "target": "next_trading_day_close",
+    "features": [
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Volume",
+        "Return_1D",
+        "Return_5D",
+        "Return_20D",
+        "MA20",
+        "MA50",
+        "MA200",
+        "Rolling_Volatility_20D",
+        "Volume_Ratio"
+    ],
+    "feature_count": 13,
+    "training_samples": 257,
+    "testing_samples": 65,
+    "baseline_mae": 2.0581538461538447,
+    "baseline_rmse": 2.574610351400471,
+    "baseline_r2": 0.6588138360948519,
+    "model_mae": 15.484260047325721,
+    "model_rmse": 18.88804110707662,
+    "model_r2": -17.3629405157235
+}
