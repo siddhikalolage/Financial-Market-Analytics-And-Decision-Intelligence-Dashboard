@@ -8,3 +8,5 @@ tensorflow==2.20.0
 plotly==5.24.1
 seaborn==0.13.2
 pytest==8.4.1
+
+pytest-cov==6.2.1
