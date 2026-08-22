@@ -1,188 +1,618 @@
-1. Project Purpose
-This Stock Market Tracker is a learning-oriented project meant for Python intermediate students. It demonstrates how to:
+Financial Market Analytics & Decision Intelligence Dashboard
 
-Analyze stock price data from a CSV (no external APIs needed).
+An end-to-end financial analytics project combining time-series analysis, risk analytics, machine learning, and Flask-based decision intelligence into an interactive stock market dashboard.
 
-Use Jupyter Notebook for exploration, visualization, and basic machine learning.
+Disclaimer: This project is for educational and research purposes only. It does not provide financial advice or investment recommendations.
 
-Build a simple dashboard with Flask for visual display and trend tracking.
+Project Overview
 
-Predict whether a stock's price will increase or decrease the next day using a neural network.
+This project transforms historical OHLCV stock data into analytical insights through four layers:
 
-2. How It Works
-Workflow:
+Data Layer — loads and validates historical market data.
 
-Start with a dataset of daily stock prices (data/stock_data.csv).
+Analytics Layer — calculates returns, trends, volatility, drawdowns, volume behaviour, and risk-adjusted metrics.
 
-Jupyter Notebook:
+Machine Learning Layer — trains a neural-network regression model for next-day price prediction and evaluates it against a persistence baseline.
 
-Perform Exploratory Data Analysis (EDA)
+Decision Intelligence Layer — combines market evidence, momentum, trend, risk, volume, and model reliability into an explainable market decision.
 
-Build and train a neural network model
+The results are exposed through a Flask dashboard and REST API endpoints.
 
-Make next-day close price predictions
+Key Capabilities
 
-Flask Dashboard:
+Financial Analytics
 
-Reads the same CSV file
+Daily, 5-day, and 20-day returns
 
-Shows summary stats: last close price, 30-day trading volume average, and recent trend (up or down)
+YTD and cumulative returns
 
-Simple, easy-to-use web interface
+CAGR
 
-You can extend both the notebook and the dashboard as you learn!
+Win rate
 
-3. Technologies Used
-Python: All code (backend and data work)
+Average gain and loss
 
-Pandas: Data manipulation and loading
+Profit factor
 
-NumPy: Math and array processing (behind the scenes)
+Sharpe ratio
 
-Matplotlib: Visualizing data in the notebook
+Sortino ratio
 
-scikit-learn: Preprocessing and train/test splits
+Calmar ratio
 
-TensorFlow/Keras: Machine learning (neural network)
+Maximum and current drawdown
 
-Flask: Lightweight web server for dashboard
+Rolling and annualized volatility
 
-Jupyter Notebook: Interactive data science environment
+Downside volatility
 
-HTML/CSS: Dashboard front-end
+Moving averages: MA20, MA50, MA200
 
-4. Detailed Concepts for Each File
-1. data/stock_data.csv
-Concepts:
+Price distance from moving averages
 
-Tabular Data Format: CSV (Comma-Separated Values) is a simple, human-readable tabular format. Each row represents a daily record; columns represent fields including Date and OHLCV (Open, High, Low, Close, Volume).
+Volume ratio and volume spike detection
 
-OHLCV Data: Key stock market data that describes trading activity for each day — pivotal for financial analysis and modeling.
+Drawdown duration
 
-Time Series Data: Each row is ordered chronologically, establishing a sequence essential for trend detection and prediction.
+Dataset statistics
 
-No APIs / Offline Data Usage: Emphasizes processing of static data files, simplifying dependencies and focusing on core analytical concepts.
+Machine Learning
 
-2. app.py
-Concepts:
+Next-day closing-price prediction
 
-Flask Web Application:
+Sequential time-series train/test methodology
 
-Routing (@app.route("/")): Maps the root URL to a function that handles HTTP requests and returns responses (HTML page).
+Feature scaling
 
-Server Start: Uses app.run(debug=True) to start a local development server.
+Neural-network regression
 
-Data Processing with Pandas:
+Prediction evaluation
 
-Reads CSV data (pd.read_csv).
+Persistence-baseline comparison
 
-Performs quick computations:
+Model reliability scoring
 
-Extracts the last closing price with .iloc[-1] (indexing).
+ML warning when the model underperforms the baseline
 
-Calculates the 30-day average volume using .tail(30).mean().
+Decision Intelligence
 
-Determines trend direction by computing the difference of closing prices (diff()), a simple form of time series differencing.
+Bullish / Bearish / Neutral market classification
 
-Template Rendering:
+Market decision score
 
-Passes Python variables (last_close, avg_volume, trend) to the HTML template engine Jinja2 via render_template() for dynamic content display.
+Confidence score
 
-Minimal Backend Logic: Keeps web app simple by performing only aggregate calculations and rendering results, demonstrating a basic full-stack workflow.
+Risk level
 
-3. templates/index.html
-Concepts:
+Explainable evidence
 
-HTML & Template Engine (Jinja2):
+Momentum assessment
 
-Places dynamic data in the web page using {{ variable }} syntax.
+Trend assessment
 
-Uses control structures, like conditionals within template (inline with CSS styling) to adjust appearance dynamically (e.g., green for “UP”, red for “DOWN”).
+Volume assessment
 
-Semantic HTML:
+ML reliability weighting
 
-Structures page content with headings (<h1>), paragraphs (<p>), and container <div>.
+Human-readable decision explanation
 
-Separation of Concerns:
+Dashboard & API
 
-Business logic is in Python backend; HTML only handles presentation.
+Interactive Flask dashboard
+
+Financial KPI cards
+
+Trend and risk visualizations
+
+Prediction information
+
+Decision intelligence panel
+
+REST endpoints for analytics and model outputs
+
+JSON-safe API responses
+
+Architecture
+
+                    ┌─────────────────────┐
+                    │  stock_data.csv     │
+                    │       OHLCV         │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Data Loader      │
+                    │ validation/loading  │
+                    └──────────┬──────────┘
+                               │
+                 ┌─────────────┴─────────────┐
+                 ▼                           ▼
+       ┌──────────────────┐       ┌──────────────────┐
+       │ Financial Metrics│       │ Machine Learning │
+       │ Returns / Risk   │       │ Prediction Model │
+       │ Trend / Volume   │       │ Evaluation       │
+       └────────┬─────────┘       └────────┬─────────┘
+                │                          │
+                └────────────┬─────────────┘
+                             ▼
+                  ┌──────────────────────┐
+                  │ Decision Intelligence│
+                  │ Score / Confidence   │
+                  │ Evidence / Risk      │
+                  └──────────┬───────────┘
+                             │
+                             ▼
+                  ┌──────────────────────┐
+                  │ Flask Dashboard + API│
+                  └──────────────────────┘
 
-Static Asset Linking: Connects to external CSS with relative path /static/style.css.
+Repository Structure
 
-4. static/style.css
-Concepts:
+Financial-Market-Analytics-And-Decision-Intelligence-Dashboard/
+│
+├── analytics/
+│   ├── data_loader.py
+│   ├── metrics.py
+│   └── decision_engine.py
+│
+├── data/
+│   └── stock_data.csv
+│
+├── model/
+│   └── model and preprocessing artifacts
+│
+├── notebook/
+│   └── analysis_and_prediction_executed.ipynb
+│
+├── templates/
+│   └── index.html
+│
+├── static/
+│   └── style.css
+│
+├── tests/
+│   └── test files
+│
+├── app.py
+├── requirements.txt
+├── create_notebook.py
+├── save_model_artifacts.py
+└── README.md
 
-CSS Styling:
+Data
 
-Defines fonts, colors, padding, borders, and shadows to create a clean and readable visual design.
+The project uses historical daily OHLCV data:
 
-Box Model and Layout:
+Column
 
-Uses padding, max-width, margin:auto to center content and add spacing.
+Description
 
-Visual Feedback:
+Date
 
-Implements subtle shadows (box-shadow) and rounded corners (border-radius) for modern appeal.
+Trading date
 
-Consistent Theming:
+Open
 
-Uses neutral background (#fafafa) and text colors (#222) to ensure readability.
+Opening price
 
-Web UI/UX Principles: Basic principles for clean, focused dashboards.
+High
 
-5. notebook/analysis_and_prediction.ipynb
-Concepts:
+Highest price
 
-Data Exploration and Visualization
-Pandas Dataframe: Uses read_csv to load and manipulate data.
+Low
 
-Plotting: Uses Matplotlib .plot() for time series visualization of Close price.
+Lowest price
 
-Data Cleaning: Creates shifted target column for next-day prediction and drops rows with missing target values (important for supervised learning).
+Close
 
-Feature Preparation
-Uses selected OHLCV columns as features — relevant financial indicators.
+Closing price
 
-Scaling: Applies MinMaxScaler from scikit-learn, normalizing features between 0 and 1 to improve neural network convergence.
+Volume
 
-Model Development with TensorFlow/Keras
-Neural Network Architecture:
+Trading volume
 
-Sequential API: Easy stack of Dense layers.
+Current development dataset:
 
-Layers with relu activation induce non-linearity.
+522 observations
 
-Final output layer with 1 neuron for regression output (next day’s price).
+6 columns
 
-Compilation:
+2023-01-02 to 2024-12-31
 
-Sets optimizer to adam (adaptive learning rate) and loss function to mean squared error (MSE) appropriate for regression.
+Daily trading observations
 
-Training:
+Financial Metrics
 
-Splits data into training and test sets (sequential split — no shuffling, respecting time series).
+The analytics engine calculates:
 
-Uses model.fit() with validation split to monitor progress.
+Returns
 
-Evaluation and Visualization
-Compares predicted values to actual using overlayed line plots.
+1-day return
 
-Visual validation of model performance.
+5-day return
 
-Machine Learning Concepts Demonstrated:
-Supervised learning: Predictive modeling using input-output pairs.
+20-day return
 
-Regression: Predicting continuous numeric values.
+YTD return
 
-Feature engineering: Target shifting and scaling.
+Cumulative return
 
-Train/test split for evaluation: To prevent overfitting.
+CAGR
 
-6. requirements.txt
-Concepts:
+Risk-Adjusted Performance
 
-Lists all Python dependencies for replication and environment setup.
+Sharpe Ratio — measures return relative to total volatility.
 
-Enables use of pip install -r requirements.txt to build a reproducible development environment.
+Sortino Ratio — measures return relative to downside volatility.
 
-Documents versions for libraries implicitly by listing names.
+Calmar Ratio — measures CAGR relative to maximum drawdown.
+
+Risk
+
+Rolling volatility
+
+Annualized volatility
+
+Downside volatility
+
+Maximum drawdown
+
+Current drawdown
+
+Drawdown duration
+
+Trend
+
+MA20
+
+MA50
+
+MA200
+
+Price vs MA20
+
+Price vs MA50
+
+Price vs MA200
+
+Bullish/bearish moving-average count
+
+Volume
+
+Current volume
+
+20-day average volume
+
+Volume ratio
+
+Volume spike detection
+
+Machine Learning Pipeline
+
+Historical OHLCV
+       │
+       ▼
+Feature Selection
+       │
+       ▼
+Target Creation
+(next-day Close)
+       │
+       ▼
+Sequential Train/Test Split
+       │
+       ▼
+Feature Scaling
+       │
+       ▼
+Neural Network
+       │
+       ▼
+Prediction
+       │
+       ▼
+Model Evaluation
+       │
+       ▼
+Baseline Comparison
+       │
+       ▼
+Reliability Score
+
+The ML task is next-day closing-price regression. The pipeline preserves chronological order and avoids random shuffling so future observations are not introduced into the training process.
+
+Model Reliability
+
+The decision engine does not blindly trust the ML prediction. The trained model is evaluated against a persistence baseline:
+
+Tomorrow's price = Today's price
+
+Model performance is compared using metrics such as MAE, R², and improvement versus baseline. If the ML model performs worse than the baseline, its decision weight is reduced or removed and the dashboard explicitly reports low model reliability.
+
+Decision Intelligence
+
+Market Movement
+      +
+Momentum
+      +
+Trend
+      +
+Volume
+      +
+ML Signal
+      +
+Model Reliability
+      +
+Risk
+      ↓
+Decision Score
+      ↓
+Confidence
+      ↓
+Explainable Decision
+
+The system can produce Bullish, Bearish, or Neutral decisions together with confidence, risk level, evidence, and a human-readable explanation.
+
+Example Analytics Snapshot
+
+Example output from the current historical dataset:
+
+Performance
+-----------
+5D Return:              -2.41%
+20D Return:             -7.68%
+YTD Return:              4.17%
+Cumulative Return:      17.52%
+CAGR:                    8.42%
+Win Rate:               51.63%
+Profit Factor:           1.07
+
+Risk Adjusted
+-------------
+Sharpe Ratio:             0.41
+Sortino Ratio:            0.73
+Calmar Ratio:             0.30
+
+Trend
+-----
+Price vs MA20:           -4.76%
+Price vs MA50:           -6.50%
+Price vs MA200:          -8.43%
+Trend:                   Bearish
+
+Risk
+----
+Annualized Volatility:   27.11%
+Maximum Drawdown:       -27.99%
+Current Drawdown:       -24.92%
+Risk Level:              High
+
+Volume
+------
+Volume Ratio:             1.37x
+Status:                   Elevated Volume
+
+These values are generated from the project's historical dataset and may change if the data changes.
+
+Flask Application
+
+Run the dashboard with:
+
+python app.py
+
+Local URL:
+
+http://127.0.0.1:5000
+
+API Endpoints
+
+GET /
+GET /api/health
+GET /api/metrics
+GET /api/decision
+GET /api/prediction
+
+Installation
+
+git clone https://github.com/siddhikalolage/Financial-Market-Analytics-And-Decision-Intelligence-Dashboard.git
+cd Financial-Market-Analytics-And-Decision-Intelligence-Dashboard
+python -m venv .venv
+
+Windows PowerShell:
+
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python app.py
+
+Notebook
+
+The repository includes:
+
+notebook/analysis_and_prediction_executed.ipynb
+
+The notebook documents data loading, inspection, EDA, visualization, feature preparation, target generation, model training, evaluation, prediction visualization, and analytical conclusions.
+
+Testing
+
+Python Syntax
+
+python -m py_compile app.py
+python -m py_compile analytics\metrics.py
+python -m py_compile analytics\decision_engine.py
+
+API Smoke Test
+
+python -c "from app import app; c=app.test_client(); print('HEALTH:',c.get('/api/health').status_code); print('METRICS:',c.get('/api/metrics').status_code); print('DECISION:',c.get('/api/decision').status_code); print('PREDICTION:',c.get('/api/prediction').status_code); print('DASHBOARD:',c.get('/').status_code)"
+
+Expected:
+
+HEALTH: 200
+METRICS: 200
+DECISION: 200
+PREDICTION: 200
+DASHBOARD: 200
+
+Repository Validation
+
+git diff --check
+git status
+
+Reproducibility
+
+The project is designed for reproducible local execution through a static historical dataset, deterministic analytical calculations, explicit feature construction, chronological train/test separation, saved model artifacts where applicable, JSON-safe API outputs, and dependency declaration through requirements.txt.
+
+Data Quality & Safety Principles
+
+Missing and invalid numerical values are handled safely.
+
+Infinite and NaN values are converted to JSON-safe representations.
+
+Rolling calculations use historical observations only.
+
+Time-series ordering is preserved.
+
+Future observations are not used for historical feature construction.
+
+Model performance is compared against a simple baseline.
+
+Low-reliability ML predictions are explicitly flagged.
+
+Financial outputs include a research-use disclaimer.
+
+Technologies
+
+Programming
+
+Python
+
+Data Analytics
+
+Pandas
+
+NumPy
+
+Matplotlib
+
+Machine Learning
+
+scikit-learn
+
+TensorFlow
+
+Keras
+
+Web
+
+Flask
+
+Jinja2
+
+HTML
+
+CSS
+
+JavaScript
+
+Development
+
+Jupyter Notebook
+
+Git
+
+GitHub
+
+What This Project Demonstrates
+
+This project demonstrates practical skills relevant to Data Analyst, Data Scientist, Business Intelligence, and Financial Analytics roles:
+
+Data cleaning and validation
+
+Exploratory data analysis
+
+Time-series analysis
+
+Statistical metrics
+
+Financial risk analytics
+
+Feature engineering
+
+Machine learning
+
+Model evaluation
+
+Baseline benchmarking
+
+Explainable decision systems
+
+REST API development
+
+Dashboard development
+
+Reproducible analytical workflows
+
+Git/GitHub project management
+
+Limitations
+
+This project is an educational analytics system and is not a production trading platform.
+
+Historical data does not guarantee future performance.
+
+The ML model is not a production trading system.
+
+The dataset is limited compared with institutional market datasets.
+
+Transaction costs and slippage are not modeled.
+
+Market regime changes can reduce model reliability.
+
+External macroeconomic and fundamental variables are not included.
+
+The dashboard should not be used as an automated investment decision system.
+
+Future Improvements
+
+Live market-data ingestion
+
+Multi-stock portfolio analytics
+
+Sector-level comparison
+
+Fundamental financial indicators
+
+RSI and MACD indicators
+
+Walk-forward validation
+
+Hyperparameter optimization
+
+Model comparison across multiple algorithms
+
+Automated model monitoring
+
+Backtesting framework
+
+Portfolio risk analysis
+
+Docker deployment
+
+CI/CD testing
+
+Cloud deployment
+
+Authentication and role-based dashboard access
+
+Project Status
+
+Status: Active Development
+
+The current version focuses on financial analytics, explainable decision intelligence, ML benchmarking, dashboard/API integration, and reproducible data-science workflows.
+
+Author
+
+Siddhika Lolage
+
+GitHub: https://github.com/siddhikalolage
+
+Repository: https://github.com/siddhikalolage/Financial-Market-Analytics-And-Decision-Intelligence-Dashboard
