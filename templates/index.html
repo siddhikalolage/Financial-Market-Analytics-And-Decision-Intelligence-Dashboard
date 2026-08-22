@@ -1,252 +1,1189 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Financial Market Analytics & Decision Intelligence</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <!-- Bootstrap CSS -->
+    <meta
+        name="description"
+        content="Financial Market Analytics and Decision Intelligence Dashboard"
+    >
+
+    <title>
+        Financial Market Analytics | Decision Intelligence
+    </title>
+
+
+    <!-- =========================================================
+         BOOTSTRAP
+         ========================================================= -->
+
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
+
+
+    <!-- =========================================================
+         PROJECT CSS
+         ========================================================= -->
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
     >
 
+
     <style>
-        body {
-            background: #f4f7fb;
-            color: #172033;
-        }
-
-        .navbar {
-            background: linear-gradient(135deg, #111827, #1e3a8a);
-        }
-
-        .brand-title {
-            font-weight: 700;
-            letter-spacing: 0.3px;
-        }
-
-        .subtitle {
-            color: #cbd5e1;
-            font-size: 0.9rem;
-        }
-
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 5px 20px rgba(15, 23, 42, 0.07);
-            margin-bottom: 20px;
-        }
-
-        .metric-card {
-            min-height: 150px;
-        }
-
-        .metric-label {
-            color: #64748b;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .metric-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-top: 8px;
-        }
-
-        .section-title {
-            font-weight: 700;
-        }
-
-        .prediction-card {
-            background: linear-gradient(
-                135deg,
-                #111827,
-                #1d4ed8
-            );
-            color: white;
-        }
-
-        .prediction-price {
-            font-size: 2.7rem;
-            font-weight: 800;
-        }
-
-        .prediction-change {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .bullish {
-            color: #22c55e;
-        }
-
-        .bearish {
-            color: #ef4444;
-        }
-
-        .neutral {
-            color: #facc15;
-        }
-
-        .model-badge {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 7px 12px;
-            border-radius: 20px;
-            display: inline-block;
-            font-size: 0.8rem;
-        }
-
-        .prediction-box {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 18px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-        }
-
-        .prediction-box .label {
-            color: #64748b;
-            font-size: 0.8rem;
-        }
-
-        .prediction-box .value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-top: 5px;
-        }
-
-        .insight-card {
-            border-left: 5px solid #64748b;
-            padding: 15px;
-            background: #f8fafc;
-            border-radius: 10px;
-            margin-bottom: 12px;
-        }
-
-        .insight-negative {
-            border-left-color: #ef4444;
-        }
-
-        .insight-warning {
-            border-left-color: #f59e0b;
-        }
-
-        .insight-positive {
-            border-left-color: #22c55e;
-        }
-
-        .insight-title {
-            font-weight: 700;
-        }
-
-        .insight-message {
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        .metric-table td {
-            padding: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .metric-table td:last-child {
-            text-align: right;
-            font-weight: 600;
-        }
-
-        .warning-box {
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-            color: #9a3412;
-            border-radius: 12px;
-            padding: 15px;
-        }
-
-        footer {
-            background: #111827;
-            color: #94a3b8;
-        }
 
         /* =====================================================
-           SVG CHARTS
+           GLOBAL
+           ===================================================== */
+
+        :root {
+
+            --bg:
+                #f5f7fb;
+
+            --surface:
+                #ffffff;
+
+            --surface-soft:
+                #f8fafc;
+
+            --border:
+                #e2e8f0;
+
+            --text:
+                #172033;
+
+            --muted:
+                #64748b;
+
+            --primary:
+                #2563eb;
+
+            --primary-dark:
+                #1e3a8a;
+
+            --success:
+                #16a34a;
+
+            --danger:
+                #dc2626;
+
+            --warning:
+                #d97706;
+
+            --info:
+                #0891b2;
+
+            --dark:
+                #0f172a;
+
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            background:
+                var(--bg);
+
+            color:
+                var(--text);
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+        }
+
+
+        .container {
+
+            max-width:
+                1400px;
+
+        }
+
+
+        /* =====================================================
+           NAVBAR
+           ===================================================== */
+
+        .navbar {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f172a,
+                    #1e3a8a
+                );
+
+            box-shadow:
+                0 8px 25px
+                rgba(
+                    15,
+                    23,
+                    42,
+                    0.12
+                );
+
+        }
+
+
+        .brand-title {
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                -0.3px;
+
+        }
+
+
+        .subtitle {
+
+            color:
+                #cbd5e1;
+
+            font-size:
+                0.88rem;
+
+        }
+
+
+        .system-status {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            gap:
+                8px;
+
+            padding:
+                7px 13px;
+
+            border:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.15
+                );
+
+            border-radius:
+                999px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.08
+                );
+
+            color:
+                #e2e8f0;
+
+            font-size:
+                0.78rem;
+
+        }
+
+
+        .status-dot {
+
+            width:
+                8px;
+
+            height:
+                8px;
+
+            border-radius:
+                50%;
+
+            background:
+                #22c55e;
+
+            box-shadow:
+                0 0 0 4px
+                rgba(
+                    34,
+                    197,
+                    94,
+                    0.12
+                );
+
+        }
+
+
+        /* =====================================================
+           CARDS
+           ===================================================== */
+
+        .card {
+
+            border:
+                1px solid
+                rgba(
+                    226,
+                    232,
+                    240,
+                    0.9
+                );
+
+            border-radius:
+                16px;
+
+            box-shadow:
+                0 5px 22px
+                rgba(
+                    15,
+                    23,
+                    42,
+                    0.055
+                );
+
+            margin-bottom:
+                20px;
+
+            background:
+                var(--surface);
+
+        }
+
+
+        .card-header-clean {
+
+            padding:
+                20px 22px 0;
+
+        }
+
+
+        .section-title {
+
+            font-weight:
+                750;
+
+            letter-spacing:
+                -0.2px;
+
+            margin-bottom:
+                3px;
+
+        }
+
+
+        .section-subtitle {
+
+            color:
+                var(--muted);
+
+            font-size:
+                0.82rem;
+
+        }
+
+
+        /* =====================================================
+           KPI CARDS
+           ===================================================== */
+
+        .metric-card {
+
+            min-height:
+                150px;
+
+            transition:
+                transform 0.18s ease,
+                box-shadow 0.18s ease;
+
+        }
+
+
+        .metric-card:hover {
+
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                0 10px 28px
+                rgba(
+                    15,
+                    23,
+                    42,
+                    0.09
+                );
+
+        }
+
+
+        .metric-label {
+
+            color:
+                var(--muted);
+
+            font-size:
+                0.72rem;
+
+            font-weight:
+                700;
+
+            text-transform:
+                uppercase;
+
+            letter-spacing:
+                0.6px;
+
+        }
+
+
+        .metric-value {
+
+            font-size:
+                1.8rem;
+
+            font-weight:
+                800;
+
+            margin-top:
+                8px;
+
+            letter-spacing:
+                -0.7px;
+
+        }
+
+
+        .metric-description {
+
+            color:
+                #94a3b8;
+
+            font-size:
+                0.76rem;
+
+            margin-top:
+                5px;
+
+        }
+
+
+        .kpi-icon {
+
+            width:
+                42px;
+
+            height:
+                42px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            border-radius:
+                12px;
+
+            background:
+                #eff6ff;
+
+            color:
+                var(--primary);
+
+            font-size:
+                1.15rem;
+
+        }
+
+
+        /* =====================================================
+           STATUS BADGES
+           ===================================================== */
+
+        .badge-soft {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            border-radius:
+                999px;
+
+            padding:
+                5px 10px;
+
+            font-size:
+                0.72rem;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .badge-positive {
+
+            background:
+                #dcfce7;
+
+            color:
+                #166534;
+
+        }
+
+
+        .badge-negative {
+
+            background:
+                #fee2e2;
+
+            color:
+                #991b1b;
+
+        }
+
+
+        .badge-warning {
+
+            background:
+                #fef3c7;
+
+            color:
+                #92400e;
+
+        }
+
+
+        .badge-neutral {
+
+            background:
+                #e2e8f0;
+
+            color:
+                #475569;
+
+        }
+
+
+        /* =====================================================
+           EXECUTIVE SUMMARY
+           ===================================================== */
+
+        .summary-card {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f172a,
+                    #1d4ed8
+                );
+
+            color:
+                white;
+
+            border:
+                none;
+
+        }
+
+
+        .summary-score {
+
+            font-size:
+                3rem;
+
+            line-height:
+                1;
+
+            font-weight:
+                850;
+
+        }
+
+
+        .summary-label {
+
+            color:
+                #bfdbfe;
+
+            font-size:
+                0.75rem;
+
+            text-transform:
+                uppercase;
+
+            letter-spacing:
+                0.6px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .summary-stat {
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.08
+                );
+
+            border:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.1
+                );
+
+            border-radius:
+                12px;
+
+            padding:
+                14px;
+
+        }
+
+
+        .summary-stat-label {
+
+            color:
+                #bfdbfe;
+
+            font-size:
+                0.7rem;
+
+        }
+
+
+        .summary-stat-value {
+
+            font-size:
+                1.1rem;
+
+            font-weight:
+                750;
+
+            margin-top:
+                3px;
+
+        }
+
+
+        /* =====================================================
+           PREDICTION
+           ===================================================== */
+
+        .prediction-card {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #111827,
+                    #1d4ed8
+                );
+
+            color:
+                white;
+
+            border:
+                none;
+
+        }
+
+
+        .prediction-price {
+
+            font-size:
+                2.7rem;
+
+            font-weight:
+                850;
+
+            letter-spacing:
+                -1px;
+
+        }
+
+
+        .prediction-change {
+
+            font-size:
+                1.15rem;
+
+            font-weight:
+                750;
+
+        }
+
+
+        .bullish {
+
+            color:
+                #4ade80;
+
+        }
+
+
+        .bearish {
+
+            color:
+                #f87171;
+
+        }
+
+
+        .neutral {
+
+            color:
+                #facc15;
+
+        }
+
+
+        .model-badge {
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.1
+                );
+
+            border:
+                1px solid
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.16
+                );
+
+            padding:
+                7px 12px;
+
+            border-radius:
+                999px;
+
+            display:
+                inline-block;
+
+            font-size:
+                0.75rem;
+
+            color:
+                #e2e8f0;
+
+        }
+
+
+        /* =====================================================
+           ANALYTICS BOX
+           ===================================================== */
+
+        .analytics-box {
+
+            background:
+                var(--surface-soft);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius:
+                12px;
+
+            padding:
+                16px;
+
+            height:
+                100%;
+
+        }
+
+
+        .analytics-label {
+
+            color:
+                var(--muted);
+
+            font-size:
+                0.72rem;
+
+            text-transform:
+                uppercase;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .analytics-value {
+
+            font-size:
+                1.25rem;
+
+            font-weight:
+                800;
+
+            margin-top:
+                4px;
+
+        }
+
+
+        .analytics-detail {
+
+            color:
+                var(--muted);
+
+            font-size:
+                0.74rem;
+
+            margin-top:
+                4px;
+
+        }
+
+
+        /* =====================================================
+           CHARTS
            ===================================================== */
 
         .chart-wrapper {
-            width: 100%;
-            height: 330px;
-            position: relative;
-            overflow: hidden;
+
+            width:
+                100%;
+
+            height:
+                330px;
+
+            position:
+                relative;
+
+            overflow:
+                hidden;
+
         }
+
 
         .chart-wrapper svg {
-            width: 100%;
-            height: 100%;
-            display: block;
+
+            width:
+                100%;
+
+            height:
+                100%;
+
+            display:
+                block;
+
         }
+
 
         .chart-grid {
-            stroke: #e2e8f0;
-            stroke-width: 1;
+
+            stroke:
+                #e2e8f0;
+
+            stroke-width:
+                1;
+
         }
+
 
         .price-line {
-            fill: none;
-            stroke: #2563eb;
-            stroke-width: 2.5;
-            vector-effect: non-scaling-stroke;
+
+            fill:
+                none;
+
+            stroke:
+                #2563eb;
+
+            stroke-width:
+                2.5;
+
+            vector-effect:
+                non-scaling-stroke;
+
         }
+
 
         .price-area {
-            fill: rgba(37, 99, 235, 0.08);
+
+            fill:
+                rgba(
+                    37,
+                    99,
+                    235,
+                    0.08
+                );
+
         }
+
 
         .volume-bar {
-            fill: #60a5fa;
-            opacity: 0.75;
+
+            fill:
+                #60a5fa;
+
+            opacity:
+                0.75;
+
         }
+
 
         .chart-label {
-            fill: #64748b;
-            font-size: 11px;
+
+            fill:
+                #64748b;
+
+            font-size:
+                11px;
+
         }
 
-        .chart-empty {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #94a3b8;
-            font-size: 0.9rem;
+
+        /* =====================================================
+           INSIGHTS
+           ===================================================== */
+
+        .insight-card {
+
+            border-left:
+                4px solid
+                #94a3b8;
+
+            padding:
+                13px 15px;
+
+            background:
+                #f8fafc;
+
+            border-radius:
+                10px;
+
+            margin-bottom:
+                10px;
+
         }
 
-        @media (max-width: 768px) {
+
+        .insight-negative {
+
+            border-left-color:
+                #ef4444;
+
+        }
+
+
+        .insight-warning {
+
+            border-left-color:
+                #f59e0b;
+
+        }
+
+
+        .insight-positive {
+
+            border-left-color:
+                #22c55e;
+
+        }
+
+
+        .insight-title {
+
+            font-weight:
+                750;
+
+            font-size:
+                0.9rem;
+
+        }
+
+
+        .insight-message {
+
+            color:
+                var(--muted);
+
+            font-size:
+                0.82rem;
+
+            margin-top:
+                3px;
+
+        }
+
+
+        /* =====================================================
+           TABLE
+           ===================================================== */
+
+        .metric-table {
+
+            margin-bottom:
+                0;
+
+        }
+
+
+        .metric-table td {
+
+            padding:
+                10px 8px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+            font-size:
+                0.84rem;
+
+        }
+
+
+        .metric-table tr:last-child td {
+
+            border-bottom:
+                none;
+
+        }
+
+
+        .metric-table td:last-child {
+
+            text-align:
+                right;
+
+            font-weight:
+                700;
+
+        }
+
+
+        /* =====================================================
+           RISK
+           ===================================================== */
+
+        .risk-meter {
+
+            height:
+                8px;
+
+            background:
+                #e2e8f0;
+
+            border-radius:
+                999px;
+
+            overflow:
+                hidden;
+
+            margin-top:
+                10px;
+
+        }
+
+
+        .risk-meter-fill {
+
+            height:
+                100%;
+
+            border-radius:
+                999px;
+
+            background:
+                #f59e0b;
+
+        }
+
+
+        /* =====================================================
+           WARNING
+           ===================================================== */
+
+        .warning-box {
+
+            background:
+                #fff7ed;
+
+            border:
+                1px solid
+                #fed7aa;
+
+            color:
+                #9a3412;
+
+            border-radius:
+                12px;
+
+            padding:
+                14px;
+
+            font-size:
+                0.82rem;
+
+        }
+
+
+        .methodology-box {
+
+            background:
+                #f8fafc;
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius:
+                12px;
+
+            padding:
+                15px;
+
+        }
+
+
+        .methodology-row {
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            padding:
+                7px 0;
+
+            border-bottom:
+                1px solid
+                #e2e8f0;
+
+            font-size:
+                0.82rem;
+
+        }
+
+
+        .methodology-row:last-child {
+
+            border-bottom:
+                none;
+
+        }
+
+
+        /* =====================================================
+           FOOTER
+           ===================================================== */
+
+        footer {
+
+            background:
+                #0f172a;
+
+            color:
+                #94a3b8;
+
+        }
+
+
+        /* =====================================================
+           MOBILE
+           ===================================================== */
+
+        @media (
+            max-width: 768px
+        ) {
 
             .prediction-price {
-                font-size: 2rem;
+
+                font-size:
+                    2.1rem;
+
             }
 
-            .chart-wrapper {
-                height: 260px;
+
+            .summary-score {
+
+                font-size:
+                    2.3rem;
+
             }
+
+
+            .chart-wrapper {
+
+                height:
+                    260px;
+
+            }
+
+
+            .system-status {
+
+                display:
+                    none;
+
+            }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-<!-- ========================================================= -->
-<!-- HEADER -->
-<!-- ========================================================= -->
+
+<!-- =========================================================
+     NAVIGATION
+     ========================================================= -->
 
 <nav class="navbar navbar-dark py-3 mb-4">
 
@@ -255,35 +1192,48 @@
         <div>
 
             <div class="brand-title text-white fs-4">
+
                 📈 Financial Market Analytics
+
             </div>
 
             <div class="subtitle">
-                Analytics & Decision Intelligence Dashboard
+
+                Analytics • Risk Intelligence • ML Forecasting • Decision Support
+
             </div>
 
         </div>
 
-        <span class="model-badge">
-            ● ML System Online
-        </span>
+
+        <div class="system-status">
+
+            <span class="status-dot"></span>
+
+            Analytics System Online
+
+        </div>
 
     </div>
 
 </nav>
 
 
-<div class="container">
+<div class="container pb-4">
 
-<!-- ========================================================= -->
-<!-- ERROR -->
-<!-- ========================================================= -->
+
+<!-- =========================================================
+     ERROR
+     ========================================================= -->
 
 {% if error %}
 
 <div class="alert alert-danger">
 
-    <strong>Dashboard Error:</strong>
+    <strong>
+        Dashboard Error:
+    </strong>
+
     {{ error }}
 
 </div>
@@ -291,29 +1241,187 @@
 {% endif %}
 
 
-<!-- ========================================================= -->
-<!-- KEY METRICS -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     EXECUTIVE SNAPSHOT
+     ========================================================= -->
 
-<div class="row">
+{% if decision %}
 
-    <div class="col-md-3">
+<div class="card summary-card">
+
+    <div class="card-body p-4">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-4 mb-4 mb-lg-0">
+
+                <div class="summary-label">
+                    Decision Intelligence
+                </div>
+
+                <div class="d-flex align-items-center gap-3 mt-2">
+
+                    <div class="summary-score">
+
+                        {{ decision.decision_score|default(0)|round(1) }}
+
+                    </div>
+
+                    <div>
+
+                        <div class="fs-4 fw-bold">
+
+                            {{ decision.decision|default("N/A") }}
+
+                        </div>
+
+                        <div class="text-white-50 small">
+
+                            Analytical market signal
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-8">
+
+                <div class="row g-2">
+
+                    <div class="col-6 col-md-3">
+
+                        <div class="summary-stat">
+
+                            <div class="summary-stat-label">
+                                Confidence
+                            </div>
+
+                            <div class="summary-stat-value">
+
+                                {{ decision.confidence|default(0)|round(1) }}%
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6 col-md-3">
+
+                        <div class="summary-stat">
+
+                            <div class="summary-stat-label">
+                                Risk
+                            </div>
+
+                            <div class="summary-stat-value">
+
+                                {{ decision.risk_level|default("N/A") }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6 col-md-3">
+
+                        <div class="summary-stat">
+
+                            <div class="summary-stat-label">
+                                ML Signal
+                            </div>
+
+                            <div class="summary-stat-value">
+
+                                {{ decision.ml_signal|default("N/A") }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6 col-md-3">
+
+                        <div class="summary-stat">
+
+                            <div class="summary-stat-label">
+                                ML Reliability
+                            </div>
+
+                            <div class="summary-stat-value">
+
+                                {{ decision.model_reliability.score|default(0)|round(1) }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
+<!-- =========================================================
+     PRIMARY KPIs
+     ========================================================= -->
+
+<div class="row g-3">
+
+
+    <!-- Current Price -->
+
+    <div class="col-6 col-lg-3">
 
         <div class="card metric-card">
 
             <div class="card-body">
 
-                <div class="metric-label">
-                    Current Price
+                <div class="d-flex justify-content-between">
+
+                    <div>
+
+                        <div class="metric-label">
+                            Current Price
+                        </div>
+
+                        <div class="metric-value text-primary">
+
+                            ${{ "%.2f"|format(last_close|default(0)) }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="kpi-icon">
+                        $
+                    </div>
+
                 </div>
 
-                <div class="metric-value text-primary">
-                    ${{ "%.2f"|format(last_close) }}
-                </div>
+                <div class="metric-description">
 
-                <small class="text-muted">
                     Latest available market close
-                </small>
+
+                </div>
 
             </div>
 
@@ -322,34 +1430,48 @@
     </div>
 
 
-    <div class="col-md-3">
+    <!-- Daily Return -->
+
+    <div class="col-6 col-lg-3">
 
         <div class="card metric-card">
 
             <div class="card-body">
 
-                <div class="metric-label">
-                    Daily Change
+                <div class="d-flex justify-content-between">
+
+                    <div>
+
+                        <div class="metric-label">
+                            Daily Change
+                        </div>
+
+                        <div
+                            class="metric-value"
+                            style="color: {{ trend_color|default('#64748b') }};"
+                        >
+
+                            {{ "+" if price_change|default(0) > 0 else "" }}{{
+                                "%.2f"|format(price_change|default(0))
+                            }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="kpi-icon">
+                        Δ
+                    </div>
+
                 </div>
 
-                <div
-                    class="metric-value"
-                    style="color: {{ trend_color }};"
-                >
+                <div class="metric-description">
 
-                    {{ "+" if price_change > 0 else "" }}${{
-                        "%.2f"|format(price_change)
-                    }}
+                    {{ "+" if percent_change|default(0) > 0 else "" }}{{
+                        "%.2f"|format(percent_change|default(0))
+                    }}% daily return
 
                 </div>
-
-                <small class="text-muted">
-
-                    {{ "+" if percent_change > 0 else "" }}{{
-                        "%.2f"|format(percent_change)
-                    }}%
-
-                </small>
 
             </div>
 
@@ -358,28 +1480,41 @@
     </div>
 
 
-    <div class="col-md-3">
+    <!-- 20D Return -->
+
+    <div class="col-6 col-lg-3">
 
         <div class="card metric-card">
 
             <div class="card-body">
 
-                <div class="metric-label">
-                    Market Trend
+                <div class="d-flex justify-content-between">
+
+                    <div>
+
+                        <div class="metric-label">
+                            20D Return
+                        </div>
+
+                        <div class="metric-value">
+
+                            {{ metrics.performance.return_20d|default(0)|round(2) }}%
+
+                        </div>
+
+                    </div>
+
+                    <div class="kpi-icon">
+                        ↗
+                    </div>
+
                 </div>
 
-                <div
-                    class="metric-value"
-                    style="color: {{ trend_color }};"
-                >
+                <div class="metric-description">
 
-                    {{ trend }}
+                    Medium-term momentum indicator
 
                 </div>
-
-                <small class="text-muted">
-                    Based on latest daily movement
-                </small>
 
             </div>
 
@@ -388,25 +1523,41 @@
     </div>
 
 
-    <div class="col-md-3">
+    <!-- YTD -->
+
+    <div class="col-6 col-lg-3">
 
         <div class="card metric-card">
 
             <div class="card-body">
 
-                <div class="metric-label">
-                    Avg Volume (20D)
+                <div class="d-flex justify-content-between">
+
+                    <div>
+
+                        <div class="metric-label">
+                            YTD Return
+                        </div>
+
+                        <div class="metric-value">
+
+                            {{ metrics.performance.ytd_return|default(0)|round(2) }}%
+
+                        </div>
+
+                    </div>
+
+                    <div class="kpi-icon">
+                        Y
+                    </div>
+
                 </div>
 
-                <div class="metric-value text-info">
+                <div class="metric-description">
 
-                    {{ "{:,.0f}".format(avg_volume) }}
+                    Current calendar-year performance
 
                 </div>
-
-                <small class="text-muted">
-                    Rolling average trading volume
-                </small>
 
             </div>
 
@@ -417,9 +1568,561 @@
 </div>
 
 
-<!-- ========================================================= -->
-<!-- ML PREDICTION -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     PERFORMANCE + RISK
+     ========================================================= -->
+
+<div class="row mt-1">
+
+
+    <!-- PERFORMANCE -->
+
+    <div class="col-lg-6">
+
+        <div class="card">
+
+            <div class="card-header-clean">
+
+                <h5 class="section-title">
+                    Performance Analytics
+                </h5>
+
+                <div class="section-subtitle">
+                    Return and consistency indicators
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    <div class="col-6">
+
+                        <div class="analytics-box">
+
+                            <div class="analytics-label">
+                                Cumulative Return
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ metrics.performance.cumulative_return|default(0)|round(2) }}%
+
+                            </div>
+
+                            <div class="analytics-detail">
+                                Full available period
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6">
+
+                        <div class="analytics-box">
+
+                            <div class="analytics-label">
+                                CAGR
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ metrics.performance.cagr|default(0)|round(2) }}%
+
+                            </div>
+
+                            <div class="analytics-detail">
+                                Annualized growth rate
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6">
+
+                        <div class="analytics-box">
+
+                            <div class="analytics-label">
+                                Win Rate
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ metrics.performance.win_rate|default(0)|round(2) }}%
+
+                            </div>
+
+                            <div class="analytics-detail">
+                                Positive trading sessions
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6">
+
+                        <div class="analytics-box">
+
+                            <div class="analytics-label">
+                                Profit Factor
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ metrics.performance.profit_factor|default(0)|round(2) }}
+
+                            </div>
+
+                            <div class="analytics-detail">
+                                Gains / absolute losses
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <table class="table metric-table mt-3">
+
+                    <tr>
+                        <td>5-Day Return</td>
+                        <td>
+                            {{ metrics.performance.return_5d|default(0)|round(2) }}%
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Average Gain</td>
+                        <td>
+                            {{ metrics.performance.average_gain|default(0)|round(2) }}%
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Average Loss</td>
+                        <td>
+                            {{ metrics.performance.average_loss|default(0)|round(2) }}%
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RISK -->
+
+    <div class="col-lg-6">
+
+        <div class="card">
+
+            <div class="card-header-clean">
+
+                <h5 class="section-title">
+                    Risk Analytics
+                </h5>
+
+                <div class="section-subtitle">
+                    Volatility, downside exposure and drawdown
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    <div class="col-6">
+
+                        <div class="analytics-box">
+
+                            <div class="analytics-label">
+                                Annualized Volatility
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ metrics.risk.annualized_volatility|default(0)|round(2) }}%
+
+                            </div>
+
+                            <div class="analytics-detail">
+                                20-day rolling estimate
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6">
+
+                        <div class="analytics-box">
+
+                            <div class="analytics-label">
+                                Downside Volatility
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ metrics.risk.downside_volatility|default(0)|round(2) }}%
+
+                            </div>
+
+                            <div class="analytics-detail">
+                                Negative-return dispersion
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6">
+
+                        <div class="analytics-box">
+
+                            <div class="analytics-label">
+                                Maximum Drawdown
+                            </div>
+
+                            <div class="analytics-value text-danger">
+
+                                {{ metrics.risk.maximum_drawdown|default(0)|round(2) }}%
+
+                            </div>
+
+                            <div class="analytics-detail">
+                                Worst peak-to-trough decline
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-6">
+
+                        <div class="analytics-box">
+
+                            <div class="analytics-label">
+                                Current Drawdown
+                            </div>
+
+                            <div class="analytics-value text-danger">
+
+                                {{ metrics.risk.current_drawdown|default(0)|round(2) }}%
+
+                            </div>
+
+                            <div class="analytics-detail">
+                                Current distance from peak
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-box mt-3">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <div class="analytics-label">
+                                Risk Level
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ decision.risk_level|default("N/A") }}
+
+                            </div>
+
+                        </div>
+
+                        <div class="text-end">
+
+                            <div class="analytics-label">
+                                Risk Score
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ decision.risk_score|default(0)|round(1) }}/100
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="risk-meter">
+
+                        <div
+                            class="risk-meter-fill"
+                            style="width: {{ decision.risk_score|default(0) }}%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     RISK-ADJUSTED PERFORMANCE + TREND + VOLUME
+     ========================================================= -->
+
+<div class="row">
+
+
+    <!-- RISK ADJUSTED -->
+
+    <div class="col-lg-4">
+
+        <div class="card h-100">
+
+            <div class="card-header-clean">
+
+                <h5 class="section-title">
+                    Risk-Adjusted Performance
+                </h5>
+
+                <div class="section-subtitle">
+                    Quality of returns relative to risk
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <table class="table metric-table">
+
+                    <tr>
+                        <td>Sharpe Ratio</td>
+                        <td>
+                            {{ metrics.risk_adjusted.sharpe_ratio|default(0)|round(3) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Sortino Ratio</td>
+                        <td>
+                            {{ metrics.risk_adjusted.sortino_ratio|default(0)|round(3) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Calmar Ratio</td>
+                        <td>
+                            {{ metrics.risk_adjusted.calmar_ratio|default(0)|round(3) }}
+                        </td>
+                    </tr>
+
+                </table>
+
+                <div class="mt-3 small text-muted">
+
+                    Sharpe evaluates return per unit of total
+                    volatility, while Sortino focuses on downside
+                    risk.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TREND -->
+
+    <div class="col-lg-4">
+
+        <div class="card h-100">
+
+            <div class="card-header-clean">
+
+                <h5 class="section-title">
+                    Trend Structure
+                </h5>
+
+                <div class="section-subtitle">
+                    Moving-average positioning
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <table class="table metric-table">
+
+                    <tr>
+                        <td>MA20</td>
+                        <td>
+                            ${{ metrics.trend.ma20|default(0)|round(2) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>MA50</td>
+                        <td>
+                            ${{ metrics.trend.ma50|default(0)|round(2) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>MA200</td>
+                        <td>
+                            ${{ metrics.trend.ma200|default(0)|round(2) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Price vs MA20</td>
+                        <td>
+                            {{ metrics.trend.price_vs_ma20|default(0)|round(2) }}%
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Price vs MA200</td>
+                        <td>
+                            {{ metrics.trend.price_vs_ma200|default(0)|round(2) }}%
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- VOLUME -->
+
+    <div class="col-lg-4">
+
+        <div class="card h-100">
+
+            <div class="card-header-clean">
+
+                <h5 class="section-title">
+                    Volume Intelligence
+                </h5>
+
+                <div class="section-subtitle">
+                    Recent participation relative to baseline
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="analytics-box">
+
+                    <div class="analytics-label">
+                        Current Volume
+                    </div>
+
+                    <div class="analytics-value">
+
+                        {{ "{:,.0f}".format(metrics.volume.current|default(0)) }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-box mt-3">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <div class="analytics-label">
+                                20D Volume Ratio
+                            </div>
+
+                            <div class="analytics-value">
+
+                                {{ metrics.volume.ratio|default(0)|round(2) }}x
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            {% if metrics.volume.spike %}
+
+                            <span class="badge-soft badge-warning">
+                                Spike
+                            </span>
+
+                            {% elif metrics.volume.ratio|default(0) > 1.2 %}
+
+                            <span class="badge-soft badge-warning">
+                                Elevated
+                            </span>
+
+                            {% else %}
+
+                            <span class="badge-soft badge-neutral">
+                                Normal
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     ML FORECAST
+     ========================================================= -->
 
 {% if prediction %}
 
@@ -427,22 +2130,35 @@
 
     <div class="card-body p-4">
 
-        <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
 
             <div>
 
                 <div class="text-uppercase small opacity-75">
+
                     Machine Learning Forecast
+
                 </div>
 
-                <h2 class="mt-1">
+                <h2 class="mt-1 mb-1">
+
                     Next Trading Day Prediction
+
                 </h2>
+
+                <div class="small opacity-75">
+
+                    Model-generated forecast from engineered market features
+
+                </div>
 
             </div>
 
+
             <span class="model-badge">
-                {{ prediction.model_type }}
+
+                {{ prediction.model_type|default("ML Model") }}
+
             </span>
 
         </div>
@@ -450,7 +2166,7 @@
 
         <div class="row align-items-center mt-4">
 
-            <div class="col-md-4">
+            <div class="col-md-4 mb-3 mb-md-0">
 
                 <div class="small opacity-75">
                     Current Close
@@ -459,7 +2175,7 @@
                 <div class="fs-3 fw-bold">
 
                     ${{ "%.2f"|format(
-                        prediction.current_close
+                        prediction.current_close|default(0)
                     ) }}
 
                 </div>
@@ -467,7 +2183,7 @@
             </div>
 
 
-            <div class="col-md-4">
+            <div class="col-md-4 mb-3 mb-md-0">
 
                 <div class="small opacity-75">
                     Predicted Next Close
@@ -476,7 +2192,7 @@
                 <div class="prediction-price">
 
                     ${{ "%.2f"|format(
-                        prediction.predicted_next_close
+                        prediction.predicted_next_close|default(0)
                     ) }}
 
                 </div>
@@ -501,13 +2217,15 @@
                     {% endif %}"
                 >
 
-                    {{ "+" if prediction.predicted_change_percent > 0 else "" }}{{
+                    {{ "+" if prediction.predicted_change_percent|default(0) > 0 else "" }}{{
                         "%.2f"|format(
-                            prediction.predicted_change_percent
+                            prediction.predicted_change_percent|default(0)
                         )
                     }}%
 
-                    • {{ prediction.direction }}
+                    •
+
+                    {{ prediction.direction|default("Neutral") }}
 
                 </div>
 
@@ -522,25 +2240,30 @@
 {% endif %}
 
 
-<!-- ========================================================= -->
-<!-- HISTORICAL CHARTS -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     PRICE + VOLUME CHARTS
+     ========================================================= -->
 
 <div class="row">
 
-    <div class="col-md-8">
+
+    <div class="col-lg-8">
 
         <div class="card">
 
-            <div class="card-body">
+            <div class="card-header-clean">
 
                 <h5 class="section-title">
                     Historical Price Analysis
                 </h5>
 
-                <p class="text-muted small">
+                <div class="section-subtitle">
                     Latest 120 observations
-                </p>
+                </div>
+
+            </div>
+
+            <div class="card-body pt-2">
 
                 <div class="chart-wrapper">
 
@@ -560,19 +2283,23 @@
     </div>
 
 
-    <div class="col-md-4">
+    <div class="col-lg-4">
 
         <div class="card">
 
-            <div class="card-body">
+            <div class="card-header-clean">
 
                 <h5 class="section-title">
                     Trading Volume
                 </h5>
 
-                <p class="text-muted small">
+                <div class="section-subtitle">
                     Recent market activity
-                </p>
+                </div>
+
+            </div>
+
+            <div class="card-body pt-2">
 
                 <div class="chart-wrapper">
 
@@ -594,22 +2321,29 @@
 </div>
 
 
-<!-- ========================================================= -->
-<!-- MARKET INTELLIGENCE -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     MARKET INTELLIGENCE
+     ========================================================= -->
 
 <div class="card">
 
-    <div class="card-body">
+    <div class="card-header-clean">
 
         <h5 class="section-title">
             Market Intelligence
         </h5>
 
-        <p class="text-muted small">
-            Rule-based analytical signals derived from market data.
-        </p>
+        <div class="section-subtitle">
 
+            Analytical insights derived from historical market
+            behaviour, momentum, risk and volume.
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body">
 
         {% for insight in insights %}
 
@@ -625,12 +2359,24 @@
         >
 
             <div class="insight-title">
+
                 {{ insight.title }}
+
             </div>
 
             <div class="insight-message">
+
                 {{ insight.message }}
+
             </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="text-muted small">
+
+            No additional market insights are currently available.
 
         </div>
 
@@ -641,69 +2387,88 @@
 </div>
 
 
-<!-- ========================================================= -->
-<!-- DECISION INTELLIGENCE -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     DECISION INTELLIGENCE
+     ========================================================= -->
 
 {% if decision %}
 
 <div class="card">
 
-    <div class="card-body">
+    <div class="card-header-clean">
 
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-start">
 
             <div>
 
-                <h5 class="section-title mb-1">
+                <h5 class="section-title">
                     Decision Intelligence
                 </h5>
 
-                <p class="text-muted small mb-0">
-                    Explainable analytical decision-support layer.
-                </p>
+                <div class="section-subtitle">
+
+                    Explainable analytical decision-support layer
+
+                </div>
 
             </div>
 
-            <span
-                class="badge
-                {% if decision.decision == 'BULLISH' %}
-                    bg-success
-                {% elif decision.decision == 'BEARISH' %}
-                    bg-danger
-                {% elif decision.decision == 'WATCH' %}
-                    bg-warning text-dark
-                {% elif decision.decision == 'AVOID' %}
-                    bg-danger
-                {% else %}
-                    bg-secondary
-                {% endif %}"
-            >
 
-                {{ decision.decision }}
+            {% if decision.decision == "BULLISH" %}
 
+            <span class="badge-soft badge-positive">
+                BULLISH
             </span>
+
+            {% elif decision.decision == "BEARISH" %}
+
+            <span class="badge-soft badge-negative">
+                BEARISH
+            </span>
+
+            {% elif decision.decision == "WATCH" %}
+
+            <span class="badge-soft badge-warning">
+                WATCH
+            </span>
+
+            {% elif decision.decision == "AVOID" %}
+
+            <span class="badge-soft badge-negative">
+                AVOID
+            </span>
+
+            {% else %}
+
+            <span class="badge-soft badge-neutral">
+                {{ decision.decision|default("NEUTRAL") }}
+            </span>
+
+            {% endif %}
 
         </div>
 
+    </div>
 
-        <div class="row mt-4">
 
-            <div class="col-md-3">
+    <div class="card-body">
 
-                <div class="prediction-box">
 
-                    <div class="label">
+        <!-- Decision metrics -->
+
+        <div class="row g-3">
+
+            <div class="col-6 col-lg-3">
+
+                <div class="analytics-box">
+
+                    <div class="analytics-label">
                         Decision Score
                     </div>
 
-                    <div class="value">
+                    <div class="analytics-value">
 
-                        {{ "%.1f"|format(
-                            decision.decision_score
-                        ) }}
-
-                        / 100
+                        {{ decision.decision_score|default(0)|round(1) }}/100
 
                     </div>
 
@@ -712,82 +2477,69 @@
             </div>
 
 
-            <div class="col-md-3">
+            <div class="col-6 col-lg-3">
 
-                <div class="prediction-box">
+                <div class="analytics-box">
 
-                    <div class="label">
+                    <div class="analytics-label">
                         Confidence
                     </div>
 
-                    <div class="value">
+                    <div class="analytics-value">
 
-                        {{ "%.1f"|format(
-                            decision.confidence
-                        ) }}%
+                        {{ decision.confidence|default(0)|round(1) }}%
 
                     </div>
 
-                    <small class="text-muted">
+                    <div class="analytics-detail">
 
-                        {{ decision.confidence_label }}
+                        {{ decision.confidence_label|default("N/A") }}
 
-                    </small>
+                    </div>
 
                 </div>
 
             </div>
 
 
-            <div class="col-md-3">
+            <div class="col-6 col-lg-3">
 
-                <div class="prediction-box">
+                <div class="analytics-box">
 
-                    <div class="label">
-                        ML Reliability
+                    <div class="analytics-label">
+                        Market Score
                     </div>
 
-                    <div class="value">
+                    <div class="analytics-value">
 
-                        {{ "%.1f"|format(
-                            decision.model_reliability.score
-                        ) }}
-
-                        / 100
+                        {{ decision.market_score|default(0)|round(1) }}/100
 
                     </div>
-
-                    <small class="text-muted">
-
-                        {{ decision.model_reliability.rating }}
-
-                    </small>
 
                 </div>
 
             </div>
 
 
-            <div class="col-md-3">
+            <div class="col-6 col-lg-3">
 
-                <div class="prediction-box">
+                <div class="analytics-box">
 
-                    <div class="label">
-                        Risk Level
+                    <div class="analytics-label">
+                        Risk Score
                     </div>
 
-                    <div class="value">
+                    <div class="analytics-value">
 
-                        {{ decision.risk_level }}
+                        {{ decision.risk_score|default(0)|round(1) }}/100
 
                     </div>
 
-                    <small class="text-muted">
+                    <div class="analytics-detail">
 
-                        Score:
-                        {{ "%.1f"|format(decision.risk_score) }}
+                        {{ decision.risk_level|default("N/A") }} risk
 
-                    </small>
+                    </div>
 
                 </div>
 
@@ -795,44 +2547,117 @@
 
         </div>
 
+
+        <!-- Explanation -->
 
         <div class="alert alert-light border mt-4 mb-3">
 
-            <strong>Decision Explanation</strong>
+            <strong>
+                Analytical Interpretation
+            </strong>
 
-            <br>
+            <div class="mt-1">
 
-            {{ decision.explanation }}
+                {{ decision.explanation|default(
+                    "No explanation available."
+                ) }}
+
+            </div>
 
         </div>
 
 
-        {% if decision.ml_warning %}
+        <!-- ML reliability -->
 
-        <div class="warning-box">
+        {% if decision.model_reliability %}
 
-            <strong>ML Reliability Note</strong>
+        <div class="row g-3 mt-1">
 
-            <br>
+            <div class="col-lg-6">
 
-            {{ decision.ml_warning }}
+                <div class="analytics-box">
+
+                    <div class="analytics-label">
+                        ML Reliability
+                    </div>
+
+                    <div class="analytics-value">
+
+                        {{ decision.model_reliability.score|default(0)|round(1) }}/100
+
+                    </div>
+
+                    <div class="analytics-detail">
+
+                        Rating:
+                        {{ decision.model_reliability.rating|default("N/A") }}
+
+                    </div>
+
+                    <div class="risk-meter">
+
+                        <div
+                            class="risk-meter-fill"
+                            style="
+                                width:
+                                {{ decision.model_reliability.score|default(0) }}%;
+                                background:
+                                #2563eb;
+                            "
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-6">
+
+                <div class="analytics-box">
+
+                    <div class="analytics-label">
+                        ML Contribution
+                    </div>
+
+                    <div class="analytics-value">
+
+                        {{ (decision.ml_weight|default(0) * 100)|round(1) }}%
+
+                    </div>
+
+                    <div class="analytics-detail">
+
+                        Model influence is reduced when validation
+                        performance is weak.
+
+                    </div>
+
+                </div>
+
+            </div>
 
         </div>
 
         {% endif %}
 
 
+        <!-- Evidence -->
+
         {% if decision.evidence %}
 
         <div class="mt-4">
 
-            <h6 class="fw-bold">
+            <h6 class="fw-bold mb-3">
                 Supporting Evidence
             </h6>
 
+
             {% for item in decision.evidence %}
 
-            <div class="insight-card
+            <div
+                class="insight-card
                 {% if item.type == 'negative' %}
                     insight-negative
                 {% elif item.type == 'warning' %}
@@ -843,11 +2668,15 @@
             >
 
                 <div class="insight-title">
+
                     {{ item.category }}
+
                 </div>
 
                 <div class="insight-message">
+
                     {{ item.message }}
+
                 </div>
 
             </div>
@@ -859,9 +2688,30 @@
         {% endif %}
 
 
+        {% if decision.ml_warning %}
+
+        <div class="warning-box mt-4">
+
+            <strong>
+                ML Reliability Note
+            </strong>
+
+            <div class="mt-1">
+
+                {{ decision.ml_warning }}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
         <div class="text-muted small mt-3">
 
-            {{ decision.disclaimer }}
+            {{ decision.disclaimer|default(
+                "Analytical decision support only. Not financial advice."
+            ) }}
 
         </div>
 
@@ -872,56 +2722,72 @@
 {% endif %}
 
 
-<!-- ========================================================= -->
-<!-- MODEL EVALUATION -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     MODEL EVALUATION
+     ========================================================= -->
 
 {% if prediction %}
 
 <div class="card">
 
-    <div class="card-body">
+    <div class="card-header-clean">
 
         <h5 class="section-title">
             ML Model Evaluation
         </h5>
 
-        <p class="text-muted small">
-            Performance on the held-out test set.
-        </p>
+        <div class="section-subtitle">
+
+            Held-out test-set evaluation compared with a persistence baseline
+
+        </div>
+
+    </div>
 
 
-        <div class="row">
+    <div class="card-body">
 
-            <div class="col-md-6">
+        <div class="row g-4">
+
+
+            <!-- Dataset / Model -->
+
+            <div class="col-lg-6">
 
                 <table class="table metric-table">
 
                     <tr>
-                        <td>Training Samples</td>
+                        <td>Model Type</td>
                         <td>
-                            {{ prediction.training_samples }}
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Testing Samples</td>
-                        <td>
-                            {{ prediction.testing_samples }}
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Features</td>
-                        <td>
-                            {{ prediction.feature_count }}
+                            {{ prediction.model_type|default("N/A") }}
                         </td>
                     </tr>
 
                     <tr>
                         <td>Target</td>
                         <td>
-                            {{ prediction.target }}
+                            {{ prediction.target|default("N/A") }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Training Samples</td>
+                        <td>
+                            {{ prediction.training_samples|default("N/A") }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Testing Samples</td>
+                        <td>
+                            {{ prediction.testing_samples|default("N/A") }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Feature Count</td>
+                        <td>
+                            {{ prediction.feature_count|default("N/A") }}
                         </td>
                     </tr>
 
@@ -930,43 +2796,44 @@
             </div>
 
 
-            <div class="col-md-6">
+            <!-- Metrics -->
+
+            <div class="col-lg-6">
 
                 <table class="table metric-table">
 
                     <tr>
                         <td>Model MAE</td>
                         <td>
-                            {{ "%.4f"|format(
-                                prediction.model_mae
-                            ) }}
+                            {{ prediction.model_mae|default(0)|round(4) }}
                         </td>
                     </tr>
 
                     <tr>
                         <td>Baseline MAE</td>
                         <td>
-                            {{ "%.4f"|format(
-                                prediction.baseline_mae
-                            ) }}
+                            {{ prediction.baseline_mae|default(0)|round(4) }}
                         </td>
                     </tr>
 
                     <tr>
                         <td>Model RMSE</td>
                         <td>
-                            {{ "%.4f"|format(
-                                prediction.model_rmse
-                            ) }}
+                            {{ prediction.model_rmse|default(0)|round(4) }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Baseline RMSE</td>
+                        <td>
+                            {{ prediction.baseline_rmse|default(0)|round(4) }}
                         </td>
                     </tr>
 
                     <tr>
                         <td>Model R²</td>
                         <td>
-                            {{ "%.4f"|format(
-                                prediction.model_r2
-                            ) }}
+                            {{ prediction.model_r2|default(0)|round(4) }}
                         </td>
                     </tr>
 
@@ -977,21 +2844,37 @@
         </div>
 
 
+        {% if prediction.model_mae is not none
+              and prediction.baseline_mae is not none %}
+
         <div class="warning-box mt-3">
 
             <strong>
-                Model Evaluation Note
+                Model Evaluation Interpretation
             </strong>
 
-            <br>
+            <div class="mt-1">
 
-            The current neural network is integrated successfully,
-            but its validation performance is below the persistence
-            baseline. This dashboard presents the prediction as an
-            experimental decision-support signal rather than a
-            guaranteed forecast.
+                {% if prediction.model_mae < prediction.baseline_mae %}
+
+                The neural network currently improves upon the
+                persistence baseline on MAE, indicating measurable
+                predictive value.
+
+                {% else %}
+
+                The neural network currently does not outperform
+                the persistence baseline on MAE. The prediction
+                should therefore be treated as experimental
+                supporting evidence rather than a standalone forecast.
+
+                {% endif %}
+
+            </div>
 
         </div>
+
+        {% endif %}
 
     </div>
 
@@ -1000,21 +2883,161 @@
 {% endif %}
 
 
-<!-- ========================================================= -->
-<!-- SYSTEM INFORMATION -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     METHODOLOGY
+     ========================================================= -->
 
 <div class="card">
 
+    <div class="card-header-clean">
+
+        <h5 class="section-title">
+            Analytical Methodology
+        </h5>
+
+        <div class="section-subtitle">
+
+            How the decision-support layer combines market evidence
+
+        </div>
+
+    </div>
+
+
     <div class="card-body">
+
+        <div class="row g-3">
+
+            <div class="col-lg-7">
+
+                <div class="methodology-box">
+
+                    <div class="methodology-row">
+
+                        <span>
+                            Trend Analysis
+                        </span>
+
+                        <strong>
+                            Moving Averages
+                        </strong>
+
+                    </div>
+
+                    <div class="methodology-row">
+
+                        <span>
+                            Momentum
+                        </span>
+
+                        <strong>
+                            5D / 20D Returns
+                        </strong>
+
+                    </div>
+
+                    <div class="methodology-row">
+
+                        <span>
+                            Risk
+                        </span>
+
+                        <strong>
+                            Volatility + Drawdown
+                        </strong>
+
+                    </div>
+
+                    <div class="methodology-row">
+
+                        <span>
+                            Risk-Adjusted Return
+                        </span>
+
+                        <strong>
+                            Sharpe / Sortino / Calmar
+                        </strong>
+
+                    </div>
+
+                    <div class="methodology-row">
+
+                        <span>
+                            Market Activity
+                        </span>
+
+                        <strong>
+                            Volume Ratio
+                        </strong>
+
+                    </div>
+
+                    <div class="methodology-row">
+
+                        <span>
+                            ML Forecast
+                        </span>
+
+                        <strong>
+                            TensorFlow / Keras
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-5">
+
+                <div class="warning-box h-100">
+
+                    <strong>
+                        Research Disclaimer
+                    </strong>
+
+                    <div class="mt-2">
+
+                        This platform is an analytical research
+                        and decision-support system. Predictions,
+                        scores and signals are not financial advice
+                        and should not be interpreted as guaranteed
+                        future market outcomes.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SYSTEM INFORMATION
+     ========================================================= -->
+
+<div class="card">
+
+    <div class="card-header-clean">
 
         <h5 class="section-title">
             System Information
         </h5>
 
+    </div>
+
+
+    <div class="card-body">
+
         <div class="row text-muted small">
 
-            <div class="col-md-3">
+            <div class="col-6 col-md-3 mb-3 mb-md-0">
 
                 <strong>
                     Backend
@@ -1027,7 +3050,7 @@
             </div>
 
 
-            <div class="col-md-3">
+            <div class="col-6 col-md-3 mb-3 mb-md-0">
 
                 <strong>
                     Data Processing
@@ -1035,12 +3058,12 @@
 
                 <br>
 
-                Pandas
+                Pandas / NumPy
 
             </div>
 
 
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
 
                 <strong>
                     ML Framework
@@ -1053,7 +3076,7 @@
             </div>
 
 
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
 
                 <strong>
                     Visualization
@@ -1075,20 +3098,24 @@
 </div>
 
 
-<!-- ========================================================= -->
-<!-- FOOTER -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
 
-<footer class="py-4 mt-4">
+<footer class="py-4 mt-2">
 
     <div class="container text-center">
 
-        <div>
+        <div class="fw-semibold">
+
             Financial Market Analytics & Decision Intelligence Dashboard
+
         </div>
 
         <small>
-            ML-powered research and decision-support system
+
+            ML-powered financial analytics and research decision-support system
+
         </small>
 
     </div>
@@ -1096,9 +3123,9 @@
 </footer>
 
 
-<!-- ========================================================= -->
-<!-- SVG CHART ENGINE -->
-<!-- ========================================================= -->
+<!-- =========================================================
+     SVG CHART ENGINE
+     ========================================================= -->
 
 <script>
 
@@ -1107,23 +3134,17 @@
     "use strict";
 
 
-    /* =========================================================
-       DATA FROM FLASK
-       ========================================================= */
+    /* =====================================================
+       FLASK DATA
+       ===================================================== */
 
     const chartData =
         {{ chart_data | tojson | safe }};
 
 
-    console.log(
-        "Chart data received:",
-        chartData
-    );
-
-
-    /* =========================================================
-       SVG HELPER
-       ========================================================= */
+    /* =====================================================
+       SVG HELPERS
+       ===================================================== */
 
     function createSvgElement(
         tag,
@@ -1154,10 +3175,6 @@
     }
 
 
-    /* =========================================================
-       CLEAR SVG
-       ========================================================= */
-
     function clearSvg(svg) {
 
         while (svg.firstChild) {
@@ -1171,35 +3188,33 @@
     }
 
 
-    /* =========================================================
-       NUMBER CLEANER
-       ========================================================= */
-
     function cleanNumbers(values) {
 
         if (!Array.isArray(values)) {
+
             return [];
+
         }
 
 
         return values
-            .map(function (value) {
+            .map(
+                function (value) {
 
-                return Number(value);
+                    return Number(value);
 
-            })
-            .filter(function (value) {
+                }
+            )
+            .filter(
+                function (value) {
 
-                return Number.isFinite(value);
+                    return Number.isFinite(value);
 
-            });
+                }
+            );
 
     }
 
-
-    /* =========================================================
-       VOLUME FORMATTER
-       ========================================================= */
 
     function formatVolume(value) {
 
@@ -1235,9 +3250,9 @@
     }
 
 
-    /* =========================================================
+    /* =====================================================
        PRICE CHART
-       ========================================================= */
+       ===================================================== */
 
     function renderPriceChart() {
 
@@ -1249,10 +3264,6 @@
 
         if (!svg) {
 
-            console.error(
-                "priceChart SVG not found."
-            );
-
             return;
 
         }
@@ -1260,18 +3271,6 @@
 
         clearSvg(svg);
 
-
-        /*
-         * IMPORTANT:
-         *
-         * Flask sends:
-         *
-         * chartData.close
-         *
-         * NOT:
-         *
-         * chartData.prices
-         */
 
         const prices =
             cleanNumbers(
@@ -1285,12 +3284,6 @@
             )
                 ? chartData.dates
                 : [];
-
-
-        console.log(
-            "Price chart points:",
-            prices.length
-        );
 
 
         if (!prices.length) {
@@ -1324,14 +3317,18 @@
 
 
         const width = 800;
+
         const height = 320;
 
 
         const padding = {
 
             top: 20,
+
             right: 20,
+
             bottom: 35,
+
             left: 60
 
         };
@@ -1367,9 +3364,7 @@
             1;
 
 
-        /* =====================================================
-           GRID
-           ===================================================== */
+        /* GRID */
 
         for (
             let i = 0;
@@ -1386,7 +3381,7 @@
                 );
 
 
-            const grid =
+            svg.appendChild(
                 createSvgElement(
                     "line",
                     {
@@ -1406,11 +3401,7 @@
                         class:
                             "chart-grid"
                     }
-                );
-
-
-            svg.appendChild(
-                grid
+                )
             );
 
 
@@ -1428,8 +3419,7 @@
                     "text",
                     {
                         x:
-                            padding.left -
-                            8,
+                            padding.left - 8,
 
                         y:
                             y + 4,
@@ -1454,9 +3444,7 @@
         }
 
 
-        /* =====================================================
-           PRICE POINTS
-           ===================================================== */
+        /* POINTS */
 
         const points =
             prices.map(
@@ -1470,8 +3458,7 @@
                         (
                             index /
                             Math.max(
-                                prices.length -
-                                1,
+                                prices.length - 1,
                                 1
                             )
                         ) *
@@ -1491,17 +3478,15 @@
 
 
                     return {
-                        x: x,
-                        y: y
+                        x,
+                        y
                     };
 
                 }
             );
 
 
-        /* =====================================================
-           LINE PATH
-           ===================================================== */
+        /* LINE */
 
         const pathData =
             points
@@ -1528,9 +3513,7 @@
                 .join(" ");
 
 
-        /* =====================================================
-           AREA
-           ===================================================== */
+        /* AREA */
 
         const first =
             points[0];
@@ -1569,7 +3552,7 @@
             " Z";
 
 
-        const area =
+        svg.appendChild(
             createSvgElement(
                 "path",
                 {
@@ -1579,19 +3562,11 @@
                     class:
                         "price-area"
                 }
-            );
-
-
-        svg.appendChild(
-            area
+            )
         );
 
 
-        /* =====================================================
-           PRICE LINE
-           ===================================================== */
-
-        const line =
+        svg.appendChild(
             createSvgElement(
                 "path",
                 {
@@ -1601,17 +3576,11 @@
                     class:
                         "price-line"
                 }
-            );
-
-
-        svg.appendChild(
-            line
+            )
         );
 
 
-        /* =====================================================
-           DATE LABELS
-           ===================================================== */
+        /* DATE LABELS */
 
         if (dates.length) {
 
@@ -1623,8 +3592,7 @@
                     (
                         dates.length -
                         1
-                    ) /
-                    2
+                    ) / 2
                 ),
 
                 dates.length - 1
@@ -1658,13 +3626,11 @@
                                 "text-anchor":
                                     index === 0
                                         ? "start"
-                                        : (
+                                        :
+                                        (
                                             index ===
-                                            dates.length -
-                                            1
-
+                                            dates.length - 1
                                                 ? "end"
-
                                                 : "middle"
                                         ),
 
@@ -1690,9 +3656,9 @@
     }
 
 
-    /* =========================================================
+    /* =====================================================
        VOLUME CHART
-       ========================================================= */
+       ===================================================== */
 
     function renderVolumeChart() {
 
@@ -1704,10 +3670,6 @@
 
         if (!svg) {
 
-            console.error(
-                "volumeChart SVG not found."
-            );
-
             return;
 
         }
@@ -1716,23 +3678,14 @@
         clearSvg(svg);
 
 
-        /*
-         * IMPORTANT:
-         *
-         * Flask sends:
-         *
-         * chartData.volume
-         *
-         * NOT:
-         *
-         * chartData.volumes
-         */
-
-        const volumes =
+        const allVolumes =
             cleanNumbers(
                 chartData.volume
-            )
-            .slice(-20);
+            );
+
+
+        const volumes =
+            allVolumes.slice(-20);
 
 
         const dates =
@@ -1741,12 +3694,6 @@
             )
                 ? chartData.dates.slice(-20)
                 : [];
-
-
-        console.log(
-            "Volume chart points:",
-            volumes.length
-        );
 
 
         if (!volumes.length) {
@@ -1780,14 +3727,18 @@
 
 
         const width = 500;
+
         const height = 320;
 
 
         const padding = {
 
             top: 20,
+
             right: 15,
+
             bottom: 35,
+
             left: 55
 
         };
@@ -1811,9 +3762,7 @@
             ) || 1;
 
 
-        /* =====================================================
-           GRID
-           ===================================================== */
+        /* GRID */
 
         for (
             let i = 0;
@@ -1830,7 +3779,7 @@
                 );
 
 
-            const grid =
+            svg.appendChild(
                 createSvgElement(
                     "line",
                     {
@@ -1850,11 +3799,7 @@
                         class:
                             "chart-grid"
                     }
-                );
-
-
-            svg.appendChild(
-                grid
+                )
             );
 
 
@@ -1872,8 +3817,7 @@
                     "text",
                     {
                         x:
-                            padding.left -
-                            8,
+                            padding.left - 8,
 
                         y:
                             y + 4,
@@ -1900,9 +3844,7 @@
         }
 
 
-        /* =====================================================
-           VOLUME BARS
-           ===================================================== */
+        /* BARS */
 
         const barSlot =
             plotWidth /
@@ -1949,45 +3891,32 @@
                     barHeight;
 
 
-                const bar =
+                svg.appendChild(
                     createSvgElement(
                         "rect",
                         {
-                            x:
-                                x,
-
-                            y:
-                                y,
-
+                            x,
+                            y,
                             width:
                                 barWidth,
-
                             height:
                                 Math.max(
                                     barHeight,
                                     1
                                 ),
-
                             rx:
                                 2,
-
                             class:
                                 "volume-bar"
                         }
-                    );
-
-
-                svg.appendChild(
-                    bar
+                    )
                 );
 
             }
         );
 
 
-        /* =====================================================
-           DATE LABELS
-           ===================================================== */
+        /* DATE LABELS */
 
         if (dates.length) {
 
@@ -1999,8 +3928,7 @@
                     (
                         dates.length -
                         1
-                    ) /
-                    2
+                    ) / 2
                 ),
 
                 dates.length - 1
@@ -2012,7 +3940,9 @@
                 function (index) {
 
                     if (!dates[index]) {
+
                         return;
+
                     }
 
 
@@ -2021,8 +3951,7 @@
                         (
                             index /
                             Math.max(
-                                dates.length -
-                                1,
+                                dates.length - 1,
                                 1
                             )
                         ) *
@@ -2033,8 +3962,7 @@
                         createSvgElement(
                             "text",
                             {
-                                x:
-                                    x,
+                                x,
 
                                 y:
                                     height - 8,
@@ -2042,13 +3970,11 @@
                                 "text-anchor":
                                     index === 0
                                         ? "start"
-                                        : (
+                                        :
+                                        (
                                             index ===
-                                            dates.length -
-                                            1
-
+                                            dates.length - 1
                                                 ? "end"
-
                                                 : "middle"
                                         ),
 
@@ -2074,33 +4000,18 @@
     }
 
 
-    /* =========================================================
-       INITIALIZE
-       ========================================================= */
+    /* =====================================================
+       INITIALIZATION
+       ===================================================== */
 
     function initializeCharts() {
 
-        console.log(
-            "Initializing dashboard charts..."
-        );
-
-
         renderPriceChart();
-
 
         renderVolumeChart();
 
-
-        console.log(
-            "Dashboard charts initialized."
-        );
-
     }
 
-
-    /* =========================================================
-       DOM READY
-       ========================================================= */
 
     if (
         document.readyState ===
@@ -2124,4 +4035,6 @@
 
 
 </body>
+
 </html>
+```
