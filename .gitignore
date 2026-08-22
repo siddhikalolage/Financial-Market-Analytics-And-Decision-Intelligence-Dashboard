@@ -14,3 +14,7 @@ anaconda_projects/
 # Runtime cache
 cache/*
 !cache/.gitkeep
+
+.coverage
+htmlcov/
+.pytest_cache/
