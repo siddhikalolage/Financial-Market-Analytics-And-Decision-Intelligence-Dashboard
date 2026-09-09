@@ -155,12 +155,13 @@ The analytical engine in `app.py` is organized around reusable functions rather 
 
 | Function / Layer | Responsibility |
 |---|---|
-| `load_data()` | Reads, validates, cleans and chronologically prepares the source dataset |
-| `add_derived_metrics()` | Creates returns, moving averages, volatility, drawdown and volume features |
-| `build_metrics()` | Produces the dashboard KPI dictionary |
+| `load_data()` | Reads, validates, cleans, chronologically sorts the source dataset, and creates the reusable derived analytical fields |
+| `_safe_ratio()` | Safely calculates ratio-based KPIs while handling zero or missing denominators |
+| `build_metrics()` | Produces the dashboard KPI dictionary from the prepared analytical dataset |
 | `build_insights()` | Converts KPI relationships into descriptive analyst observations |
-| `/api/data` | Serves recent analytical observations to the frontend |
-| `/api/metrics` | Serves the KPI layer |
+| `chart_payload()` | Prepares recent analytical series for the dashboard charts |
+| `/api/data` | Serves recent observations and derived analytical fields to the frontend |
+| `/api/metrics` | Serves the KPI layer as JSON |
 | `/api/health` | Provides lightweight application/data health information |
 
 ### Analytical calculation flow
@@ -173,20 +174,18 @@ load_data()
     ├── Coerce numeric values
     ├── Remove invalid / duplicate observations
     ├── Validate OHLC relationships
-    └── Sort chronologically
+    ├── Sort chronologically
+    └── Create derived analytics
             │
-            ▼
-add_derived_metrics()
-    │
-    ├── Daily Return / Return %
-    ├── Cumulative Return
-    ├── MA20 / MA50 / MA200
-    ├── Rolling Volatility
-    ├── Rolling Average Volume
-    ├── Volume Ratio
-    ├── Drawdown
-    ├── Volume Change
-    └── Range %
+            ├── Daily Return / Return %
+            ├── Cumulative Return
+            ├── MA20 / MA50 / MA200
+            ├── Rolling Volatility
+            ├── Rolling Average Volume
+            ├── Volume Ratio
+            ├── Drawdown
+            ├── Volume Change
+            └── Range %
             │
             ▼
 build_metrics()
@@ -220,436 +219,268 @@ build_insights()
 ### Risk
 
 - Annualized volatility
+- Rolling 20D annualized volatility
 - Downside volatility
-- Rolling 20-day volatility
 - Maximum drawdown
 - Current drawdown
 
-### Risk-adjusted / efficiency indicators
+### Risk-adjusted performance
 
-- Sharpe-style ratio
-- Sortino-style ratio
-- Calmar-style ratio
+- Sharpe ratio
+- Sortino ratio
+- Calmar ratio
 - Profit factor
 
-These metrics are intended for **descriptive historical analysis**, not portfolio optimization or investment advice.
-
-### Participation and market behaviour
+### Market participation
 
 - Average volume
-- Latest volume ratio versus 20-day average
+- 20D average volume
+- Volume ratio
 - Volume change
-- Up-day count
-- Down-day count
-- Price range percentage
-- Price position relative to moving averages
+- Up/down session counts
 
 ### Data quality
 
-The application also exposes analytical-quality indicators such as:
+- Missing-value count
+- Duplicate-date count
+- Chronological-order validation
+- OHLC consistency checks
 
-- missing-value count;
-- duplicate-date count;
-- chronological ordering status;
-- observation count;
-- dataset start and end dates.
+See [`docs/kpi_dictionary.md`](docs/kpi_dictionary.md) for the metric definitions, formulas, interpretation guidance and dashboard mapping.
 
 ---
 
 ## 7. Dashboard Storytelling
 
-The dashboard is structured as an analyst workflow rather than a collection of unrelated charts.
-
-### 1. Executive Snapshot
-
-Answers: **“What is happening?”**
-
-Displays high-level performance and risk indicators so a stakeholder can understand the current state quickly.
-
-### 2. Performance & Trend
-
-Answers: **“How has price behaved?”**
-
-Compares price with moving averages and highlights short- and medium-term return behaviour.
-
-### 3. Market Participation
-
-Answers: **“Is trading activity changing?”**
-
-Uses volume and rolling-average comparisons to identify periods of unusually high or low participation.
-
-### 4. Risk & Downside
-
-Answers: **“How unstable or vulnerable has the asset been?”**
-
-Shows rolling volatility and drawdown behaviour to provide context for observed returns.
-
-### 5. Decision Intelligence
-
-Answers: **“What should an analyst investigate next?”**
-
-Transforms relationships between KPIs into concise descriptive observations, such as price distance from a moving average, elevated volume, volatility conditions or drawdown status.
-
-### 6. Methodology
-
-Answers: **“How was each number calculated?”**
-
-Makes the dashboard auditable by documenting definitions, assumptions and interpretation boundaries.
-
----
-
-## 8. Data Quality & Validation
-
-Data quality is treated as part of the analytical workflow, not as an afterthought.
-
-Before analytics are generated, the application checks:
-
-- required OHLCV columns exist;
-- dates can be parsed;
-- numeric fields can be converted safely;
-- observations are chronologically ordered;
-- duplicate dates are identified;
-- missing values are handled;
-- OHLC values are logically consistent;
-- negative OHLCV values are rejected;
-- zero closing prices are rejected;
-- sufficient observations exist for rolling calculations.
-
-For example:
+The dashboard is structured to follow an analyst's decision path:
 
 ```text
-High >= max(Open, Close)
-Low  <= min(Open, Close)
-Close > 0
-Volume >= 0
+Executive Snapshot
+       ↓
+Performance & Trend
+       ↓
+Market Participation
+       ↓
+Risk & Drawdown
+       ↓
+Data Quality
+       ↓
+Analyst Insights
+       ↓
+Methodology / Interpretation Boundary
 ```
 
-This prevents invalid source records from silently producing misleading KPIs.
+This is intentionally different from a chart-only stock application: every visual is connected to an analytical question and accompanied by an interpretation boundary.
 
 ---
 
-## 9. SQL Analytics Layer
+## 8. SQL Analytics Layer
 
-The `sql/` directory demonstrates how the same business questions can be expressed in a relational analytics environment.
+The `sql/` directory provides PostgreSQL-style analytical examples covering:
 
-| SQL file | Analytical purpose |
+- data-quality auditing;
+- daily and multi-period performance;
+- moving averages and volume baselines;
+- rolling volatility and drawdown;
+- strongest/weakest observations;
+- risk bands and review queues;
+- KPI-oriented summary queries.
+
+The SQL layer demonstrates how the same business questions can be implemented in a relational analytics environment and later connected to a warehouse/BI workflow.
+
+See [`sql/README.md`](sql/README.md) for the query catalogue and SQL-to-dashboard mapping.
+
+---
+
+## 9. Data Quality & Validation
+
+Before analytical outputs are exposed, the application validates:
+
+- required OHLCV columns;
+- parseable dates and numeric fields;
+- duplicate dates;
+- chronological ordering;
+- negative values and zero close prices;
+- logical OHLC relationships (`High >= Open/Close` and `Low <= Open/Close`);
+- minimum observations required for rolling analytics.
+
+Automated tests cover the data contract, KPI outputs, metric consistency, API fields and health metadata.
+
+---
+
+## 10. Technology Stack
+
+| Layer | Technology |
 |---|---|
-| `data_quality.sql` | Nulls, duplicates, date coverage and OHLC consistency |
-| `kpi_analysis.sql` | Current KPIs and drawdown calculations |
-| `performance_analysis.sql` | Returns and moving-average analysis |
-| `risk_analysis.sql` | Rolling volatility and drawdown analysis |
-| `ranking_analysis.sql` | Descriptive performance/risk ranking |
-
-The SQL layer is intentionally aligned with the Python analytical model so the project demonstrates **transferable analytics thinking**, not just Python-specific implementation.
-
----
-
-## 10. API Layer
-
-The Flask application exposes a lightweight analytical API:
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /` | Renders the interactive dashboard |
-| `GET /api/data` | Returns recent observations and derived analytical fields |
-| `GET /api/metrics` | Returns the analytical KPI layer |
-| `GET /api/health` | Returns application and dataset health information |
-
-The frontend consumes the API rather than embedding calculated values directly into the HTML.
+| Language | Python |
+| Data analysis | pandas, NumPy |
+| Backend | Flask |
+| Visualization | Chart.js |
+| SQL analytics | PostgreSQL-style SQL |
+| Testing | Pytest |
+| CI | GitHub Actions |
+| Documentation | Markdown + Mermaid/ASCII analytical diagrams |
+| Version control | Git / GitHub |
 
 ---
 
-## 11. Technology Stack
-
-### Data & Analytics
-
-- **Python**
-- **Pandas**
-- **NumPy**
-- **Scikit-learn** for the secondary notebook benchmark
-
-### BI / Visualization
-
-- **Chart.js**
-- **HTML5 / CSS3**
-- Responsive dashboard design
-
-### Application
-
-- **Flask**
-- JSON API endpoints
-
-### Database / Analytics
-
-- **SQL**
-- Window-function based analytical patterns
-
-### Development & Quality
-
-- **Jupyter Notebook**
-- **Pytest**
-- **GitHub Actions**
-- Git / GitHub version control
-
----
-
-## 12. Project Structure
+## 11. Project Structure
 
 ```text
 Financial-Market-Analytics-And-Decision-Intelligence-Dashboard/
-│
+├── app.py
 ├── data/
-│   └── stock_data.csv                  # Historical OHLCV dataset
-│
+│   └── stock_data.csv
 ├── docs/
-│   ├── business_questions.md            # Stakeholder questions → metrics → views
-│   ├── data_dictionary.md               # Source and derived fields
-│   └── methodology.md                   # Calculation and interpretation contract
-│
-├── notebook/
-│   └── analysis_and_prediction.ipynb    # Exploratory / secondary modelling work
-│
+│   ├── analytics_methodology.md
+│   ├── business_questions.md
+│   ├── data_dictionary.md
+│   ├── kpi_dictionary.md
+│   └── methodology.md
 ├── sql/
-│   ├── data_quality.sql                 # Data validation analysis
-│   ├── kpi_analysis.sql                 # KPI calculations
-│   ├── performance_analysis.sql         # Returns and trend analysis
-│   ├── risk_analysis.sql                # Volatility and drawdown analysis
-│   └── ranking_analysis.sql             # Ranking / descriptive segmentation
-│
-├── tests/
-│   └── test_app.py                      # Automated analytical/API tests
-│
-├── .github/
-│   └── workflows/
-│       └── ci.yml                       # Continuous integration
-│
-├── static/
-│   └── style.css                        # Responsive dashboard styling
-│
+│   ├── README.md
+│   ├── data_quality.sql
+│   ├── kpi_analysis.sql
+│   ├── performance_analysis.sql
+│   ├── ranking_analysis.sql
+│   └── risk_analysis.sql
 ├── templates/
-│   └── index.html                       # Dashboard presentation layer
-│
-├── app.py                               # Data + analytics + API engine
-├── requirements.txt                     # Python dependencies
-└── Readme.md                            # Project documentation
+│   └── index.html
+├── static/
+│   └── style.css
+├── tests/
+│   └── test_app.py
+├── notebook/
+│   └── analysis_and_prediction.ipynb
+├── requirements.txt
+└── .github/
+    └── workflows/
+        └── ci.yml
 ```
 
 ---
 
-## 13. Reproducible Analytical Workflow
-
-```text
-1. Clone repository
-       ↓
-2. Create isolated Python environment
-       ↓
-3. Install dependencies
-       ↓
-4. Validate dataset through application logic
-       ↓
-5. Run automated tests
-       ↓
-6. Start Flask dashboard
-       ↓
-7. Review KPIs and analytical charts
-       ↓
-8. Investigate generated observations
-       ↓
-9. Review SQL equivalents for BI/database analysis
-```
-
-This workflow makes the project easier for another analyst or recruiter to inspect and reproduce.
-
----
-
-## 14. Running Locally
+## 12. Reproducible Workflow
 
 ```bash
 git clone https://github.com/siddhikalolage/Financial-Market-Analytics-And-Decision-Intelligence-Dashboard.git
 cd Financial-Market-Analytics-And-Decision-Intelligence-Dashboard
-python -m venv .venv
-```
-
-### Windows PowerShell
-
-```powershell
-.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python -m pytest -q
 python app.py
 ```
 
-Then open:
+Run the automated tests with:
 
-```text
-http://127.0.0.1:5000/
+```bash
+pytest -q
 ```
 
-For development debugging, set `FLASK_DEBUG=1`. The application defaults to debug-disabled behaviour.
+The dashboard is then available through the Flask development server configured by `app.py`.
 
 ---
 
-## 15. Methodology
+## 13. Analytical Methodology
 
-### Daily Return
+### Returns
 
-```text
-(Current Close / Previous Close - 1) × 100
-```
+Daily return:
 
-### Cumulative Return
+`Daily Return = (Close_t / Close_(t-1)) - 1`
 
-```text
-(Current Close / First Close - 1) × 100
-```
+Period return:
 
-### Annualized Volatility
+`Period Return = (Close_t / Close_(t-n)) - 1`
 
-The standard deviation of daily percentage returns is scaled by `√252`, using 252 as a common approximation for annual trading sessions.
+### Moving average
 
-### Maximum Drawdown
+`MA_n = mean(Close over previous n observations)`
 
-```text
-(Current Close / Running Peak - 1) × 100
-```
+### Annualized volatility
 
-### Moving Average
+`Annualized Volatility = StdDev(Daily Returns) × √252`
 
-Rolling moving averages provide descriptive trend context. The dashboard calculates 20-, 50- and 200-observation moving averages in the analytical layer.
+### Drawdown
 
-### Volume Ratio
+`Drawdown_t = (Close_t / Running Peak_t) - 1`
 
-```text
-Latest Volume / Rolling Average Volume
-```
+### Volume ratio
 
-A ratio above 1 indicates that the latest trading volume is above its rolling baseline; it should be interpreted as a descriptive participation signal rather than a trading recommendation.
+`Volume Ratio_t = Volume_t / Rolling 20D Average Volume_t`
 
-For the complete analytical contract, see `docs/methodology.md`.
+### CAGR
+
+`CAGR = (Ending Value / Beginning Value)^(1 / Years) - 1`
+
+For interpretation details and assumptions, see [`docs/analytics_methodology.md`](docs/analytics_methodology.md).
 
 ---
 
-## 16. Predictive Modelling Note
+## 14. Data Analyst / BI Analyst Skill Mapping
 
-The notebook retains a small predictive benchmark as a **secondary learning component**. Its chronological split occurs before feature scaling to prevent test-period information from influencing the scaler.
-
-The production dashboard deliberately prioritizes:
-
-- transparent historical analytics;
-- explainable KPIs;
-- risk and performance context;
-- reproducible calculations;
-- decision-oriented visualization.
-
-Any future forecasting extension should use chronological validation, leakage prevention, appropriate baselines and clearly reported error metrics before being considered a production-quality forecasting component.
-
----
-
-## 17. Testing & Quality Assurance
-
-The repository includes automated tests covering:
-
-- dataset schema;
-- date ordering and uniqueness;
-- OHLCV validity;
-- derived analytical fields;
-- KPI availability;
-- KPI consistency with the source dataframe;
-- data-quality metrics;
-- API health response;
-- analytical data endpoint.
-
-GitHub Actions is configured to execute the test suite for the relevant branches.
-
-The objective is to make analytical changes **testable and reproducible**, not just visually correct.
-
----
-
-## 18. Data Analyst / BI Analyst Skill Mapping
-
-| Skill | Evidence in Project |
+| Portfolio capability | Demonstrated evidence |
 |---|---|
-| Python | Data ingestion, transformation, KPI calculations and API layer |
-| Pandas / NumPy | Time-series preparation and analytical feature engineering |
-| SQL | Data quality, KPI, performance, risk and ranking queries |
-| Data Cleaning | Type coercion, missing values, duplicates and validation rules |
-| EDA | Returns, trends, volatility, drawdowns and volume behaviour |
-| KPI Development | Performance, risk, efficiency and participation metrics |
-| BI Dashboarding | Interactive KPI cards, charts, insights and methodology |
-| Data Storytelling | Business-question-driven dashboard structure |
-| Statistical Analysis | Volatility, downside measures and risk-adjusted indicators |
-| API Development | Flask JSON endpoints for analytical delivery |
-| Testing | Pytest analytical and API contract tests |
-| CI/CD | GitHub Actions validation workflow |
-| Documentation | Data dictionary, methodology, business questions and architecture |
-| Decision Intelligence | KPI relationships converted into analyst-facing observations |
+| Data cleaning | Schema, type, duplicate and chronology validation |
+| Exploratory analytics | Returns, trend, volume, volatility and drawdown |
+| KPI development | Reusable performance, risk, efficiency and quality KPIs |
+| SQL | Window functions, aggregations, ranking and quality checks |
+| Dashboarding | Executive KPI cards, interactive charts and analyst insights |
+| Business thinking | Business questions mapped to analytical outputs |
+| Data storytelling | Executive → trend → risk → participation → insight flow |
+| Data quality | Explicit validation rules and quality indicators |
+| API integration | Flask JSON endpoints feeding the dashboard |
+| Testing | Pytest analytical-contract coverage |
+| CI/CD awareness | GitHub Actions workflow |
+| Documentation | KPI dictionary, methodology, SQL catalogue and architecture diagrams |
 
 ---
 
-## 19. What Makes This More Than a Stock Dashboard?
+## 15. What Makes This More Than a Stock Dashboard?
 
-A basic stock dashboard typically stops at:
+A basic stock dashboard typically answers **“what happened to the price?”**
 
-```text
-CSV → Chart
-```
+This project additionally addresses:
 
-This project extends that workflow to:
+- **Can the data be trusted?** → validation and quality checks
+- **How strong was the performance?** → multi-period return KPIs
+- **What was the risk?** → volatility and drawdown analysis
+- **Was market participation unusual?** → volume ratio
+- **How efficient was historical return relative to risk?** → Sharpe / Sortino / Calmar context
+- **What should an analyst investigate next?** → rule-based descriptive observations
+- **Can the same logic work in SQL?** → dedicated SQL analytical layer
+- **Can another analyst reproduce and validate it?** → tests, documentation and CI
 
-```text
-CSV
- ↓
-Validation
- ↓
-Cleaning
- ↓
-Reusable analytical transformations
- ↓
-Financial KPI framework
- ↓
-Performance + risk + participation analysis
- ↓
-SQL equivalents
- ↓
-Automated testing
- ↓
-API delivery
- ↓
-Interactive BI dashboard
- ↓
-Decision-oriented insights
-```
-
-The emphasis is therefore on **analytical reasoning and business interpretation**, not simply visualization.
+The project therefore demonstrates an **analytics workflow and BI mindset**, not only frontend visualization.
 
 ---
 
-## 20. Future Enhancement Roadmap
+## 16. Limitations & Interpretation Boundary
 
-Potential extensions include:
+- Historical market analytics do not guarantee future performance.
+- Moving averages and volume ratios are descriptive indicators, not trading instructions.
+- Risk-adjusted ratios depend on the selected historical period and assumptions.
+- The current risk-free-rate assumption for Sharpe/Sortino context is zero.
+- SQL files are PostgreSQL-style examples and may require syntax adaptation for other database engines.
+- The dashboard is a portfolio analytics product, not a production trading system or financial-advice engine.
+
+---
+
+## 17. Roadmap
+
+Potential future extensions include:
 
 - multi-asset comparison;
-- sector and benchmark comparison;
-- configurable date ranges;
-- downloadable analytical datasets;
-- richer anomaly investigation views;
-- database-backed ingestion;
+- sector and benchmark attribution;
+- parameterized date-range analysis;
+- warehouse-backed SQL/BI deployment;
 - scheduled data refresh;
-- role-oriented dashboard views;
-- additional BI reporting layers.
+- role-based dashboard views;
+- alerting for data-quality failures or unusual observations;
+- Power BI semantic-model integration.
 
-These are intentionally separated from the current scope so the existing analytical pipeline remains understandable and reproducible.
-
----
-
-## 21. Ownership
-
-This repository is maintained as an **individual portfolio project by Siddhika Lolage**.
-
-The implementation demonstrates end-to-end ownership across data preparation, analytical modelling, SQL analysis, dashboard development, testing, documentation and decision-support presentation.
+These are extensions to the analytics/BI layer rather than requirements for the current portfolio baseline.
 
 ---
 
-## 22. Disclaimer
+## 18. Individual Ownership
 
-This project is for educational and portfolio demonstration purposes. Historical analytics do not guarantee future market performance and should not be interpreted as financial, investment or trading advice.
+This repository is developed as an individual portfolio project demonstrating end-to-end ownership across data preparation, analytics engineering, SQL analysis, dashboard development, testing, documentation, and delivery.
