@@ -87,7 +87,25 @@ The application treats the file as a **historical analytical dataset**. It does 
 
 Derived analytical fields include daily return, cumulative return, moving averages, rolling volatility, rolling average volume, drawdown, volume change and intraday range percentage.
 
-## 7. Technology Stack
+## 7. SQL Analytics Layer
+
+The `sql/` directory provides database-oriented versions of the analytical logic so the project demonstrates skills beyond Python scripting:
+
+- `data_quality.sql` — nulls, duplicates, OHLC consistency and date coverage.
+- `kpi_analysis.sql` — current KPI calculations and drawdown.
+- `performance_analysis.sql` — returns and moving averages.
+- `risk_analysis.sql` — rolling volatility and drawdown analysis.
+- `ranking_analysis.sql` — performance ranking and descriptive risk bands.
+
+The SQL examples use modern window-function patterns and are intended to be adapted to a relational database containing the same `stock_data` schema.
+
+## 8. Analytical Documentation
+
+- `docs/data_dictionary.md` — source and derived field definitions.
+- `docs/methodology.md` — calculation methodology and interpretation principles.
+- `docs/business_questions.md` — mapping between stakeholder questions, metrics and dashboard views.
+
+## 9. Technology Stack
 
 - **Python** — analytical and application logic
 - **Pandas / NumPy** — data preparation and numerical analysis
@@ -95,8 +113,10 @@ Derived analytical fields include daily return, cumulative return, moving averag
 - **Chart.js** — interactive browser visualizations
 - **HTML / CSS** — responsive presentation layer
 - **Jupyter Notebook** — exploratory analysis and modelling workflow
+- **SQL** — data-quality, KPI, performance, risk and ranking analytics
+- **Pytest / GitHub Actions** — automated validation
 
-## 8. API Endpoints
+## 10. API Endpoints
 
 | Endpoint | Purpose |
 |---|---|
@@ -105,15 +125,29 @@ Derived analytical fields include daily return, cumulative return, moving averag
 | `GET /api/metrics` | Return the current analytical KPI set |
 | `GET /api/health` | Lightweight application health check |
 
-## 9. Project Structure
+## 11. Project Structure
 
 ```text
 Financial-Market-Analytics-And-Decision-Intelligence-Dashboard/
 ├── data/
 │   └── stock_data.csv
 ├── docs/
+│   ├── business_questions.md
+│   ├── data_dictionary.md
+│   └── methodology.md
 ├── notebook/
 │   └── analysis_and_prediction.ipynb
+├── sql/
+│   ├── data_quality.sql
+│   ├── kpi_analysis.sql
+│   ├── performance_analysis.sql
+│   ├── risk_analysis.sql
+│   └── ranking_analysis.sql
+├── tests/
+│   └── test_app.py
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── static/
 │   └── style.css
 ├── templates/
@@ -123,7 +157,7 @@ Financial-Market-Analytics-And-Decision-Intelligence-Dashboard/
 └── Readme.md
 ```
 
-## 10. Running Locally
+## 12. Running Locally
 
 ```bash
 git clone https://github.com/siddhikalolage/Financial-Market-Analytics-And-Decision-Intelligence-Dashboard.git
@@ -143,13 +177,17 @@ python app.py
 
 Then open `http://127.0.0.1:5000/` in a browser.
 
+Run automated tests with:
+
+```powershell
+python -m pytest -q
+```
+
 For development debugging, set `FLASK_DEBUG=1`. The application defaults to debug-disabled behaviour.
 
-## 11. Analytical Methodology
+## 13. Analytical Methodology
 
 ### Daily Return
-
-Daily percentage return is calculated as:
 
 `(Current Close / Previous Close - 1) × 100`
 
@@ -163,23 +201,25 @@ The standard deviation of daily percentage returns is scaled by `√252`, a comm
 
 ### Maximum Drawdown
 
-Drawdown is measured relative to the running historical maximum close:
-
 `(Current Close / Running Peak - 1) × 100`
 
 ### Moving Average
 
 The dashboard uses a 20-observation moving average as a descriptive trend indicator.
 
-These measures are intended for analytical interpretation and portfolio-project demonstration, **not financial advice or a trading recommendation**.
+See `docs/methodology.md` for the full analytical contract.
 
-## 12. Predictive Modelling Note
+## 14. Predictive Modelling Note
 
-The repository retains the original notebook's predictive-modelling work as a learning component. The production dashboard deliberately prioritizes transparent historical analytics and decision support over speculative forecasting.
+The notebook retains a small predictive benchmark as a secondary learning component. Its chronological split now occurs before feature scaling, preventing test-period information from influencing the scaler. The production dashboard deliberately prioritizes transparent historical analytics and decision support over speculative forecasting.
 
 Any future predictive model should be evaluated against appropriate chronological baselines, with leakage prevention, time-aware validation and clearly reported error metrics before being treated as a serious forecasting component.
 
-## 13. Data Analyst / BI Analyst Relevance
+## 15. Testing & Quality
+
+The repository includes automated tests for the dataset contract and API health, metrics and data endpoints. GitHub Actions runs the test suite for changes to the main and analytics-upgrade branches.
+
+## 16. Data Analyst / BI Analyst Relevance
 
 This project demonstrates an end-to-end analytical workflow:
 
@@ -189,17 +229,19 @@ Relevant skills demonstrated include:
 
 - Python and Pandas analytics
 - Time-series data preparation
+- SQL window functions
 - Financial KPI design
 - Statistical risk indicators
 - Dashboard development
 - API-based data delivery
 - Analytical storytelling
 - Reproducible methodology
+- Automated testing / CI
 
-## 14. Ownership
+## 17. Ownership
 
 This repository is maintained as an individual portfolio project by **Siddhika Lolage**.
 
-## 15. Disclaimer
+## 18. Disclaimer
 
 This project is for educational and portfolio demonstration purposes. Historical analytics do not guarantee future market performance and should not be interpreted as financial, investment or trading advice.
