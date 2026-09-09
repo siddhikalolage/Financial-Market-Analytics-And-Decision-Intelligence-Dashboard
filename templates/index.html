@@ -12,48 +12,38 @@
     <main class="dashboard-shell">
         <header class="hero">
             <div>
-                <p class="eyebrow">FINANCIAL ANALYTICS</p>
+                <p class="eyebrow">FINANCIAL ANALYTICS • BI DECISION SUPPORT</p>
                 <h1>MarketPulse Decision Intelligence</h1>
-                <p class="subtitle">Historical performance, risk, market behaviour and decision-oriented insights from OHLCV data.</p>
+                <p class="subtitle">A stakeholder-ready view of historical performance, trend, market participation, risk and data quality — built from validated OHLCV data.</p>
             </div>
             <div class="data-status">
                 <span class="status-dot"></span>
-                Historical dataset<br>
+                <strong>Dataset status</strong><br>
+                Historical • {{ metrics.observations }} observations<br>
                 {{ metrics.start_date }} → {{ metrics.end_date }}
             </div>
         </header>
 
-        <section class="kpi-grid" aria-label="Key performance indicators">
-            <article class="kpi-card">
-                <span>Latest Close</span>
-                <strong>${{ metrics.last_close }}</strong>
-                <small>Most recent observation</small>
-            </article>
-            <article class="kpi-card {{ 'positive' if metrics.percent_change >= 0 else 'negative' }}">
-                <span>Daily Return</span>
-                <strong>{{ '+' if metrics.percent_change >= 0 else '' }}{{ metrics.percent_change }}%</strong>
-                <small>Versus previous close</small>
-            </article>
-            <article class="kpi-card">
-                <span>Total Period Return</span>
-                <strong>{{ '+' if metrics.period_return >= 0 else '' }}{{ metrics.period_return }}%</strong>
-                <small>From first to latest close</small>
-            </article>
-            <article class="kpi-card">
-                <span>Annualized Volatility</span>
-                <strong>{{ metrics.annualized_volatility }}%</strong>
-                <small>Historical risk indicator</small>
-            </article>
-            <article class="kpi-card negative">
-                <span>Maximum Drawdown</span>
-                <strong>{{ metrics.max_drawdown }}%</strong>
-                <small>Peak-to-trough decline</small>
-            </article>
-            <article class="kpi-card">
-                <span>30D Avg Volume</span>
-                <strong>{{ "{:,}".format(metrics.avg_volume) }}</strong>
-                <small>Average trading volume</small>
-            </article>
+        <section class="section-heading">
+            <div><span class="label">EXECUTIVE SNAPSHOT</span><h2>Performance at a glance</h2></div>
+            <span class="period-badge">Historical descriptive analytics</span>
+        </section>
+        <section class="kpi-grid" aria-label="Executive performance indicators">
+            <article class="kpi-card"><span>Latest Close</span><strong>${{ metrics.last_close }}</strong><small>Most recent observation</small></article>
+            <article class="kpi-card {{ 'positive' if metrics.percent_change >= 0 else 'negative' }}"><span>Daily Return</span><strong>{{ '+' if metrics.percent_change >= 0 else '' }}{{ metrics.percent_change }}%</strong><small>Versus previous close</small></article>
+            <article class="kpi-card {{ 'positive' if metrics.return_20d >= 0 else 'negative' }}"><span>20D Return</span><strong>{{ '+' if metrics.return_20d >= 0 else '' }}{{ metrics.return_20d }}%</strong><small>Short-term performance</small></article>
+            <article class="kpi-card {{ 'positive' if metrics.ytd_return >= 0 else 'negative' }}"><span>YTD Return</span><strong>{{ '+' if metrics.ytd_return >= 0 else '' }}{{ metrics.ytd_return }}%</strong><small>Calendar-year performance</small></article>
+            <article class="kpi-card"><span>CAGR</span><strong>{{ metrics.cagr }}%</strong><small>Annualized period growth</small></article>
+            <article class="kpi-card"><span>Observations</span><strong>{{ metrics.observations }}</strong><small>{{ metrics.start_date }} to {{ metrics.end_date }}</small></article>
+        </section>
+
+        <section class="kpi-grid secondary-kpis" aria-label="Risk and market participation indicators">
+            <article class="kpi-card"><span>Annualized Volatility</span><strong>{{ metrics.annualized_volatility }}%</strong><small>Historical risk indicator</small></article>
+            <article class="kpi-card negative"><span>Maximum Drawdown</span><strong>{{ metrics.max_drawdown }}%</strong><small>Peak-to-trough decline</small></article>
+            <article class="kpi-card"><span>Sharpe Ratio</span><strong>{{ metrics.sharpe_ratio }}</strong><small>Return per unit of volatility</small></article>
+            <article class="kpi-card"><span>Sortino Ratio</span><strong>{{ metrics.sortino_ratio }}</strong><small>Return per unit of downside risk</small></article>
+            <article class="kpi-card"><span>Volume Ratio</span><strong>{{ metrics.volume_ratio }}×</strong><small>Latest vs 20D average volume</small></article>
+            <article class="kpi-card {{ 'positive' if metrics.current_drawdown == 0 else 'negative' }}"><span>Current Drawdown</span><strong>{{ metrics.current_drawdown }}%</strong><small>Distance from running peak</small></article>
         </section>
 
         <section class="signal-banner">
@@ -61,54 +51,52 @@
                 <span class="label">CURRENT MARKET SIGNAL</span>
                 <h2 class="{{ trend_class }}">{{ trend }}</h2>
             </div>
-            <div class="signal-copy">
-                <strong>{{ metrics.observations }}</strong> observations analyzed. Use the dashboard to evaluate performance and risk rather than relying on a single price movement.
-            </div>
+            <div class="signal-copy"><strong>Analyst context:</strong> use performance, participation and risk together rather than relying on a single price movement. This dashboard is descriptive and is not a trading recommendation.</div>
         </section>
 
         <section class="chart-grid">
             <article class="panel wide">
-                <div class="panel-heading">
-                    <div><span class="label">PERFORMANCE</span><h2>Price & 20-Day Moving Average</h2></div>
-                    <span class="period-badge">Latest 90 observations</span>
-                </div>
+                <div class="panel-heading"><div><span class="label">PERFORMANCE & TREND</span><h2>Price vs 20D and 50D Moving Averages</h2></div><span class="period-badge">Latest 90 observations</span></div>
                 <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
             </article>
             <article class="panel">
-                <div class="panel-heading"><div><span class="label">PARTICIPATION</span><h2>Trading Volume</h2></div></div>
+                <div class="panel-heading"><div><span class="label">MARKET PARTICIPATION</span><h2>Volume vs 20D Average</h2></div></div>
                 <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
             </article>
             <article class="panel">
-                <div class="panel-heading"><div><span class="label">RISK</span><h2>Rolling Volatility</h2></div></div>
+                <div class="panel-heading"><div><span class="label">RISK</span><h2>20D Rolling Annualized Volatility</h2></div></div>
                 <div class="chart-wrap"><canvas id="volatilityChart"></canvas></div>
             </article>
             <article class="panel wide">
-                <div class="panel-heading"><div><span class="label">DRAWDOWN</span><h2>Peak-to-Trough Risk</h2></div></div>
+                <div class="panel-heading"><div><span class="label">DOWNSIDE RISK</span><h2>Historical Peak-to-Trough Drawdown</h2></div><span class="period-badge">Lower is more negative</span></div>
                 <div class="chart-wrap"><canvas id="drawdownChart"></canvas></div>
             </article>
         </section>
 
+        <section class="quality-row">
+            <article class="panel quality-card">
+                <div><span class="label">DATA QUALITY</span><h2>Analytical dataset checks</h2></div>
+                <div class="quality-grid">
+                    <div><strong>{{ metrics.data_quality.missing_values }}</strong><span>Missing values</span></div>
+                    <div><strong>{{ metrics.data_quality.duplicate_dates }}</strong><span>Duplicate dates</span></div>
+                    <div><strong>{{ 'Valid' if metrics.data_quality.date_ordered else 'Review' }}</strong><span>Chronological order</span></div>
+                </div>
+            </article>
+        </section>
+
         <section class="insights panel">
-            <div class="panel-heading"><div><span class="label">DECISION INTELLIGENCE</span><h2>Analyst Insights</h2></div></div>
+            <div class="panel-heading"><div><span class="label">DECISION INTELLIGENCE</span><h2>Analyst Insights</h2></div><span class="period-badge">Rule-based descriptive observations</span></div>
             <div class="insight-grid">
-                {% for insight in insights %}
-                <div class="insight-item"><span>{{ "%02d"|format(loop.index) }}</span><p>{{ insight }}</p></div>
-                {% endfor %}
+                {% for insight in insights %}<div class="insight-item"><span>{{ "%02d"|format(loop.index) }}</span><p>{{ insight }}</p></div>{% endfor %}
             </div>
         </section>
 
         <section class="methodology panel">
-            <div>
-                <span class="label">METHODOLOGY</span>
-                <h2>How to interpret this dashboard</h2>
-            </div>
-            <p>Returns are calculated from daily closing prices. Annualized volatility uses the standard deviation of daily returns scaled by √252. Drawdown measures the percentage decline from the running historical peak. Moving averages and volume metrics are descriptive indicators, not trading recommendations.</p>
+            <div><span class="label">METHODOLOGY</span><h2>How to read the dashboard</h2></div>
+            <p><strong>Performance:</strong> returns compare closing prices across defined periods. <strong>Trend:</strong> moving averages provide descriptive context. <strong>Risk:</strong> volatility measures variability while drawdown captures peak-to-trough decline. <strong>Participation:</strong> volume ratio compares the latest session with its 20-observation baseline. <strong>Risk-adjusted metrics:</strong> Sharpe, Sortino and Calmar provide contextual efficiency measures. All outputs are historical analytics, not financial advice.</p>
         </section>
 
-        <footer>
-            <span>Financial Market Analytics & Decision Intelligence Dashboard</span>
-            <span>Built for analytical demonstration • Not financial advice</span>
-        </footer>
+        <footer><span>Financial Market Analytics & Decision Intelligence Dashboard</span><span>Data → Quality → KPI → Analysis → Insight → Decision Support</span></footer>
     </main>
 
     <script>
@@ -117,26 +105,21 @@
         const baseOptions = {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: true, labels: { usePointStyle: true } } },
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { display: true, labels: { usePointStyle: true } }, tooltip: { mode: 'index', intersect: false } },
             scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }, y: { grid: { color: grid } } }
         };
-
-        new Chart(document.getElementById('priceChart'), {
-            type: 'line',
-            data: { labels: data.dates, datasets: [
-                { label: 'Close', data: data.prices, borderWidth: 2, pointRadius: 0, tension: .25 },
-                { label: 'MA 20', data: data.ma20, borderWidth: 2, pointRadius: 0, borderDash: [6, 4], tension: .25 }
-            ]}, options: baseOptions
-        });
-        new Chart(document.getElementById('volumeChart'), {
-            type: 'bar', data: { labels: data.dates, datasets: [{ label: 'Volume', data: data.volumes, borderWidth: 0 }]}, options: baseOptions
-        });
-        new Chart(document.getElementById('volatilityChart'), {
-            type: 'line', data: { labels: data.dates, datasets: [{ label: '20D Annualized Volatility %', data: data.volatility, borderWidth: 2, pointRadius: 0, tension: .25 }]}, options: baseOptions
-        });
-        new Chart(document.getElementById('drawdownChart'), {
-            type: 'line', data: { labels: data.dates, datasets: [{ label: 'Drawdown %', data: data.drawdown, fill: true, borderWidth: 2, pointRadius: 0, tension: .25 }]}, options: baseOptions
-        });
+        new Chart(document.getElementById('priceChart'), { type: 'line', data: { labels: data.dates, datasets: [
+            { label: 'Close', data: data.prices, borderWidth: 2, pointRadius: 0, tension: .25 },
+            { label: 'MA 20', data: data.ma20, borderWidth: 2, pointRadius: 0, borderDash: [6,4], tension: .25 },
+            { label: 'MA 50', data: data.ma50, borderWidth: 2, pointRadius: 0, borderDash: [2,4], tension: .25 }
+        ]}, options: baseOptions });
+        new Chart(document.getElementById('volumeChart'), { type: 'bar', data: { labels: data.dates, datasets: [
+            { label: 'Volume', data: data.volumes, borderWidth: 0 },
+            { type: 'line', label: '20D Avg Volume', data: data.avg_volume, borderWidth: 2, pointRadius: 0, tension: .25 }
+        ]}, options: baseOptions });
+        new Chart(document.getElementById('volatilityChart'), { type: 'line', data: { labels: data.dates, datasets: [{ label: '20D Annualized Volatility %', data: data.volatility, borderWidth: 2, pointRadius: 0, tension: .25 }]}, options: baseOptions });
+        new Chart(document.getElementById('drawdownChart'), { type: 'line', data: { labels: data.dates, datasets: [{ label: 'Drawdown %', data: data.drawdown, fill: true, borderWidth: 2, pointRadius: 0, tension: .25 }]}, options: baseOptions });
     </script>
 </body>
 </html>
