@@ -79,7 +79,7 @@
                 <div class="quality-grid">
                     <div><strong>{{ metrics.data_quality.missing_values }}</strong><span>Missing values</span></div>
                     <div><strong>{{ metrics.data_quality.duplicate_dates }}</strong><span>Duplicate dates</span></div>
-                    <div><strong>{{ 'Valid' if metrics.data_quality.date_ordered else 'Review' }}</strong><span>Chronological order</span></div>
+                    <div><strong>{{ 'Valid' if metrics.data_quality.date_order_valid else 'Review' }}</strong><span>Chronological order</span></div>
                 </div>
             </article>
         </section>
